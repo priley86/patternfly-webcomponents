@@ -5,6 +5,7 @@
     <title>pf-dropdown example</title>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.13.0/css/patternfly.css">
     <link rel="stylesheet" href="/dist/css/patternfly.css">
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.22/webcomponents.js"></script>
     <script src="/dist/js/patternfly.js"></script>
@@ -15,11 +16,12 @@
         <div class="page-header">
             <h1>Dropdown</h1>
         </div>
-        <pf-dropdown label="Dropdown">
+        <pf-dropdown label="Dropdown" vertical-align="top" horizontal-align="right">
             <pf-item header="true">Items Header</pf-item>
             <pf-item>Item 1</pf-item>
-            <pf-item disable="true">Item 2</pf-item>
-            <pf-item>Item 3</pf-item>
+            <pf-item disable="true"><a href="">Item 2</a></pf-item>
+            <pf-item><a href="">Item 3</a></pf-item>
+            <pf-item><a href="">Item 4</a></pf-item>
             <pf-item divider="true"><a href="">Link Item</a></pf-item>
         </pf-dropdown>
     </div>

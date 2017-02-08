@@ -1,2 +1,2 @@
 /* pf-dropdown webcomponent */
-require('pf-dropdown.component');
+require('pf-dropdown.component.js');

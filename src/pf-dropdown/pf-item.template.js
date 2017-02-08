@@ -1,6 +1,5 @@
 var pfItemTemplate = `
-    <li><slot></slot></li>
-    `
+    <li role="presentation"></li>
+    `;
 
-export{pfItemTemplate as default}
-  
+export { pfItemTemplate as default };
