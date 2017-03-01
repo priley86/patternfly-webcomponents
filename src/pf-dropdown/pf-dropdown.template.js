@@ -1,5 +1,3 @@
-var pfDropdownTemplate = `
-    
-`;
+var pfDropdownTemplate = ``;
 
 export { pfDropdownTemplate as default };
