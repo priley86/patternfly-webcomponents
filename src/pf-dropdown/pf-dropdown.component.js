@@ -1,5 +1,3 @@
-import { default as tmpl } from 'pf-dropdown.template';
-
 /**
  *
  *
@@ -11,8 +9,16 @@ export class PfDropdown extends HTMLElement {
    * Called when an instance was inserted into the document
    */
   attachedCallback() {
-    this.appendChild(this._template.content);
-    this.toggle();
+    let self = this;
+    let button = this.querySelector('[data-toggle="dropdown"]');
+    button.addEventListener('click', function () {
+      self._showDropdown();
+    });
+    document.addEventListener('click', function (event) {
+      if (event.target !== self && !self.contains(event.target)) {
+        self._clearDropdown(button);
+      }
+    });
     //this._detectTouch();
   }
 
@@ -31,24 +37,14 @@ export class PfDropdown extends HTMLElement {
    * Called when an instance of the element is created
    */
   createdCallback() {
-    this._template = document.createElement('template');
-    this._template.innerHTML = tmp1;
+
   }
 
   /**
    *Toggle the dropdown
    */
   toggle() {
-    let self = this;
-    let button = this.querySelector('[data-toggle="dropdown"]');
-    button.addEventListener('click', function () {
-      self._showDropdown();
-    });
-    document.addEventListener('click', function (event) {
-      if (event.target !== self && !self.contains(event.target)) {
-        self._clearDropdown(button);
-      }
-    });
+    this._showDropdown();
   }
 
   /**
@@ -62,9 +58,10 @@ export class PfDropdown extends HTMLElement {
     let active = this.classList.contains('open');
     if (!active) {
       this._detectTouch();
-      this.dispatchEvent(new CustomEvent('openDropdown', {}));
+      this.dispatchEvent(new CustomEvent('show.bs.dropdown', {}));
       button.setAttribute('aria-expanded', 'true');
       this.classList.toggle('open');
+      this.dispatchEvent(new CustomEvent('shown.bs.dropdown', {}));
     }
     if (active) {
       this._clearDropdown(button);
@@ -79,9 +76,10 @@ export class PfDropdown extends HTMLElement {
   _clearDropdown(button) {
     //let backdrop = this.querySelector('.dropdown-backdrop');
     //backdrop.parentNode.removeChild(backdrop);
-    this.dispatchEvent(new CustomEvent('closeDropdown', {}));
+    this.dispatchEvent(new CustomEvent('hide.bs.dropdown', {}));
     button.setAttribute('aria-expanded', 'false');
     this.classList.remove('open');
+    this.dispatchEvent(new CustomEvent('hidden.bs.dropdown', {}));
   }
 
   /**
