@@ -55,7 +55,7 @@
         result[item[0]] = decodeURIComponent(item[1]);
       });
 
-      var pathToFile = "/src/" + result.dir + "/" + result.file;
+      var pathToFile = "../src/" + result.dir + "/" + result.file;
       document.getElementById('example').setAttribute('src', pathToFile);
 
       var rawFile = new XMLHttpRequest();
