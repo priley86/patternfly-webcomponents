@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>pf-dropdown example</title>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/patternfly/3.13.0/css/patternfly.css">
+  <link rel="stylesheet" href="/dist/css/patternfly.css">
+  <link rel="stylesheet" href="/dist/css/patternfly-webcomponents.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.22/webcomponents.js"></script>
+  <script src="/dist/js/patternfly.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>Dropdown</h1>
+    </div>
+    <pf-dropdown id="dropdown1"><div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown2" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false">
+        Dropdown
+        <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li class="dropdown-header">Header</li>
+          <li><a href="#">Item 1</a></li>
+          <li><a href="#">Item 2</a></li>
+          <li class="disabled"><a href="#">Item 3</a></li>
+          <li><a href="#">Item 4</a></li>
+          <li class="divider"></li>
+          <li><a href="#">Item 5</a></li>
+        </ul>
+        </div>
+    </pf-dropdown>
+  </div>
+  <script>
+    var dropdown = document.getElementById('dropdown1');
+    var button = document.getElementById('dropdown2')
+    button.addEventListener('click',function(){
+      dropdown.toggle();
+    }); 
+  <script>
+</body>
+
+</html>
