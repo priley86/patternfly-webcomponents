@@ -26,8 +26,7 @@ export class PfDropdown extends HTMLElement {
    * Called when an instance was inserted into the document
    */
   attachedCallback() {
-    let self = this;
-    this._button = this.querySelector('[data-toggle="dropdown"]');
+    this._button = this.querySelector('.btn');
     this._disabled = /\bdisabled/.test(this._button.className);
 
     this._button.addEventListener('click', () => {
@@ -35,21 +34,25 @@ export class PfDropdown extends HTMLElement {
     });
 
     document.addEventListener('click', (event) => {
+      //close dropdown if clicked outside menu
       if (event.target !== this && !this.contains(event.target)) {
         this._clearDropdown();
       }
     });
 
     document.addEventListener('keydown', (event) => {
-      if (!/(38|40|27|13)/.test(event.keyCode) || /input|textarea/.test(event.target.tagName)) {
+      if (/input|textarea/.test(event.target.tagName)) {
         return;
       }
       if (this._disabled) {
         return;
       }
+      let keycode = event.keyCode ? event.keyCode : event.which;
       let active = /\bopen/.test(this._button.parentNode.className);
-      if (active) {
-        this._keyHandler(event);
+
+      //check if dropdown is open and keys other than 38,40,27,13 are not being used
+      if (active && /(38|40|27|13)/.test(keycode)) {
+        this._keyHandler(event, keycode);
       }
     });
   }
@@ -133,25 +136,30 @@ export class PfDropdown extends HTMLElement {
    *
    * @param {Event} event
    */
-  _keyHandler(event) {
-
+  _keyHandler(event, keycode) {
     event.preventDefault();
     event.stopPropagation();
 
-    if (event.keyCode === 27 || event.keyCode === 13) {
+    if (keycode === 27) {
+      this._clearDropdown();
+      this._button.focus();
+    }
+    if (keycode === 13) {
+      event.target.dispatchEvent(new MouseEvent('click'));
       this._clearDropdown();
     }
-    if (event.keyCode === 38 || event.keyCode === 40) {
+    if (keycode === 38 || keycode === 40) {
       let menuItem = this.querySelectorAll('.dropdown-menu li:not(.disabled) a');
+      // index: guide focus on menu items
       let index = Array.prototype.indexOf.call(menuItem, event.target);
 
-      if (event.keyCode === 38 && index > 0) {
+      if (keycode === 38 && index > 0) {
         index--;
       }
-      if (event.keyCode === 40 && index < menuItem.length - 1) {
+      if (keycode === 40 && index < menuItem.length - 1) {
         index++;
       }
-      if (!index) {
+      if (!~index) {
         index = 0;
       }
       menuItem[index].focus();
