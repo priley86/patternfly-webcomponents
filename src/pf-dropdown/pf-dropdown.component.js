@@ -86,16 +86,17 @@ export class PfDropdown extends HTMLElement {
    *
    */
   _showDropdown() {
-    if (/\bdisabled/.test(this._button.className)) {
+    let button = this.querySelector('.btn');
+    if (/\bdisabled/.test(button.className)) {
       return;
     }
-    let active = this._button.parentNode.classList.contains('open');
+    let active = /\bopen/.test(button.parentNode.className);
     if (!active) {
       this._detectTouch();
       this.dispatchEvent(new CustomEvent('show.bs.dropdown', {}));
-      this._button.focus();
-      this._button.setAttribute('aria-expanded', 'true');
-      this._button.parentNode.classList.toggle('open');
+      button.focus();
+      button.setAttribute('aria-expanded', 'true');
+      button.parentNode.classList.toggle('open');
       this.dispatchEvent(new CustomEvent('shown.bs.dropdown', {}));
     }
     if (active) {
@@ -107,13 +108,14 @@ export class PfDropdown extends HTMLElement {
    *
    */
   _clearDropdown() {
+    let button = this.querySelector('.btn');
     let backdrop = this.querySelector('.dropdown-backdrop');
     if (backdrop) {
       backdrop.parentNode.removeChild(backdrop);
     }
     this.dispatchEvent(new CustomEvent('hide.bs.dropdown', {}));
-    this._button.setAttribute('aria-expanded', 'false');
-    this._button.parentNode.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+    button.parentNode.classList.remove('open');
     this.dispatchEvent(new CustomEvent('hidden.bs.dropdown', {}));
   }
 
