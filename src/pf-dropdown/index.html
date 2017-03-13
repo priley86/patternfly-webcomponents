@@ -15,28 +15,49 @@
     <div class="page-header">
       <h1>Dropdown</h1>
     </div>
-    <pf-dropdown id="dropdown1"><div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown2" data-toggle="dropdown" aria-haspopup="true"
-        aria-expanded="false">
+    <div class="col-xs-6 col-sm-4 col-md-2">
+      <!-- Dropdown Button -->
+      <pf-dropdown id="dropdown1">
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle" type="button" id="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Dropdown
         <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu">
-          <li class="dropdown-header">Header</li>
-          <li><a href="#">Item 1</a></li>
-          <li><a href="#">Item 2</a></li>
-          <li class="disabled"><a href="#">Item 3</a></li>
-          <li><a href="#">Item 4</a></li>
-          <li class="divider"></li>
-          <li><a href="#">Item 5</a></li>
-        </ul>
+          <ul class="dropdown-menu">
+            <li class="dropdown-header">Header</li>
+            <li><a href="#">Item 1</a></li>
+            <li><a href="#">Item 2</a></li>
+            <li class="disabled"><a href="#">Item 3</a></li>
+            <li><a href="#">Item 4</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Item 5</a></li>
+          </ul>
         </div>
-    </pf-dropdown>
+      </pf-dropdown>
+
+      <!-- Dropdown Kebab -->
+      <pf-dropdown id="dropdown2">
+        <div class="dropdown pull-right dropdown-kebab-pf">
+          <button class="btn btn-link dropdown-toggle" type="button" id="button2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="fa fa-ellipsis-v"></span>
+        </button>
+          <ul class="dropdown-menu">
+            <li class="dropdown-header">Header</li>
+            <li><a href="#">Item 1</a></li>
+            <li><a href="#">Item 2</a></li>
+            <li class="disabled"><a href="#">Item 3</a></li>
+            <li><a href="#">Item 4</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Item 5</a></li>
+          </ul>
+        </div>
+      </pf-dropdown>
+    </div>
   </div>
   <script>
-    var dropdown = document.getElementById('dropdown1');
-    var button = document.getElementById('dropdown2');
+    var dropdown = document.getElementById('dropdown');
     //dropdown.toggle();
   </script>
 </body>
+
 </html>
