@@ -47,12 +47,11 @@ export class PfDropdown extends HTMLElement {
       if (this._disabled) {
         return;
       }
-      let keycode = event.keyCode ? event.keyCode : event.which;
       let active = /\bopen/.test(this._button.parentNode.className);
 
-      //check if dropdown is open and keys other than 38,40,27,13 are not being used
-      if (active && /(38|40|27|13)/.test(keycode)) {
-        this._keyHandler(event, keycode);
+      //check if dropdown is open
+      if (active) {
+        this._keyHandler(event);
       }
     });
   }
@@ -136,19 +135,21 @@ export class PfDropdown extends HTMLElement {
    *
    * @param {Event} event
    */
-  _keyHandler(event, keycode) {
-    event.preventDefault();
-    event.stopPropagation();
+  _keyHandler(event) {
+    let keycode = event.keyCode ? event.keyCode : event.which;
 
+    // escape key
     if (keycode === 27) {
       this._clearDropdown();
       this._button.focus();
     }
-    if (keycode === 13) {
-      event.target.dispatchEvent(new MouseEvent('click'));
-      this._clearDropdown();
-    }
+
+    // up and down key
     if (keycode === 38 || keycode === 40) {
+
+      event.preventDefault();
+      event.stopPropagation();
+
       let menuItem = this.querySelectorAll('.dropdown-menu li:not(.disabled) a');
       // index: guide focus on menu items
       let index = Array.prototype.indexOf.call(menuItem, event.target);
