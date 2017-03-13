@@ -122,10 +122,11 @@ export class PfDropdown extends HTMLElement {
    *
    */
   _detectTouch() {
+    let dropdown = this.querySelector('.dropdown');
     if ('ontouchstart' in document.documentElement) {
       let div = document.createElement('div');
       div.classList.add('dropdown-backdrop');
-      this.insertBefore(div, this.querySelector('.dropdown-menu'));
+      dropdown.insertBefore(div, this.querySelector('.dropdown-menu'));
       div.addEventListener('click', this._clearDropdown());
     }
   }
