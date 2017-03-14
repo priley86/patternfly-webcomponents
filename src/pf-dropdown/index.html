@@ -55,8 +55,16 @@
     </div>
   </div>
   <script>
-    var dropdown = document.getElementById('dropdown');
-    //dropdown.toggle();
+  var dropdown = document.getElementById('dropdown1');
+  if(dropdown.initialized) {
+    dropdown.toggle();
+  }
+  else {
+    //wait for initialization
+    dropdown.addEventListener('initialized', function(event){
+      dropdown.toggle();
+    });
+  }
   </script>
 </body>
 

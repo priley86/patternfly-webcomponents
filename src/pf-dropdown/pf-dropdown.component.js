@@ -54,6 +54,9 @@ export class PfDropdown extends HTMLElement {
         this._keyHandler(event);
       }
     });
+
+    this.initialized = true;
+    this.dispatchEvent(new CustomEvent('initialized', {}));
   }
 
   /**
