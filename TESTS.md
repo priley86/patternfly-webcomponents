@@ -11,8 +11,13 @@ gulp test
 To debug unit tests locally with karma test server and Chrome, first edit `karma.conf.js` to target Chrome:
 ```
   browsers: ['Chrome'],
-```        
- you can then run:
+```
+You can also change `logLevel` for futher debug logging:
+```
+logLevel: config.LOG_DEBUG,
+```
+
+ you can then run the following to start a Karma debug server:
  ```
  karma start karma.conf.js
  ```
