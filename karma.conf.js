@@ -18,7 +18,8 @@ module.exports = function(config) {
       'node_modules/babel-polyfill/dist/polyfill.js',
       'node_modules/promise-polyfill/promise.js',
       'node_modules/jasmine-promises/dist/jasmine-promises.js',
-      'node_modules/webcomponentsjs/full.js',
+      'https://rawgit.com/webcomponents/webcomponentsjs/master/webcomponents-lite.js',
+      'https://rawgit.com/webcomponents/custom-elements/master/src/native-shim.js',
       'dist/js/patternfly.js',
       'src/**/*.spec.js'
     ],
@@ -60,7 +61,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['Chrome'],
 
     // you can define custom flags
     customLaunchers: {
