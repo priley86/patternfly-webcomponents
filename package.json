@@ -43,7 +43,9 @@
   },
   "dependencies": {
     "font-awesome": "^4.7.0",
-    "patternfly": "^3.21.0"
+    "patternfly": "^3.21.0",
+    "@webcomponents/webcomponentsjs": "1.0.0",
+    "@webcomponents/custom-elements": "1.0.0"
   },
   "scripts": {
     "publish": "publish-ghpages.sh public",

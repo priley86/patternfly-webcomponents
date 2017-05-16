@@ -18,8 +18,9 @@ module.exports = function(config) {
       'node_modules/babel-polyfill/dist/polyfill.js',
       'node_modules/promise-polyfill/promise.js',
       'node_modules/jasmine-promises/dist/jasmine-promises.js',
-      'https://rawgit.com/webcomponents/webcomponentsjs/master/webcomponents-lite.js',
-      'https://rawgit.com/webcomponents/custom-elements/master/src/native-shim.js',
+      'node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js',
+      'node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js.map',
+      'node_modules/@webcomponents/custom-elements/src/native-shim.js',
       'dist/js/patternfly.js',
       'src/**/*.spec.js'
     ],
