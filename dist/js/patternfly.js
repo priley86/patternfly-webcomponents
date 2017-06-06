@@ -218,7 +218,7 @@
 	            // handle dynamic addition of panels
 	            for (var i = 0; i < mutationRecord.addedNodes.length; i++) {
 	              var node = mutationRecord.addedNodes[i];
-	              if (node instanceof _pfAccordionPanel2.default) {
+	              if (node.nodeName === 'pf-accordion-panel') {
 	                var panel = node.querySelector('pf-accordion-template');
 	                if (panel !== null) {
 	                  if (panel.state === 'shown') {
