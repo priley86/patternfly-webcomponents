@@ -79,7 +79,7 @@ export class PfAccordion extends HTMLElement {
           // handle dynamic addition of panels
           for (let i = 0; i < mutationRecord.addedNodes.length; i++) {
             let node = mutationRecord.addedNodes[i];
-            if (node.nodeName === 'pf-accordion-panel') {
+            if (node.nodeName === 'PF-ACCORDION-PANEL') {
               let panel = node.querySelector('pf-accordion-template');
               if (panel !== null) {
                 if (panel.state === 'shown') {
