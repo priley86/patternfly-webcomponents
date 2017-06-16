@@ -1,11 +1,13 @@
 <!doctype html>
 <html>
+
 <head>
   <title>pf-tabs example</title>
   <link rel="stylesheet" href="../../dist/css/patternfly.css">
   <link rel="stylesheet" href="../../dist/css/patternfly-additions.css">
   <link rel="stylesheet" href="../../dist/css/patternfly-webcomponents.css">
 </head>
+
 <body>
   <div class="container">
     <div class="page-header">
@@ -17,6 +19,29 @@
       </pf-tab>
       <pf-tab tabTitle="Tab Two">
         <p>Tab two content here</p>
+      </pf-tab>
+    </pf-tabs>
+
+    <pf-tabs>
+      <pf-tab tabTitle="Tab One" active="true">
+        <pf-tabs class="nav nav-tabs nav-tabs-pf">
+          <pf-tab tabTitle="Tab One Secondary Tab One" active="true">
+            <p>Tab One Secondary Tab One content.</p>
+          </pf-tab>
+          <pf-tab tabTitle="Tab One Secondary Tab Two">
+            <p>Tab One Secondary Tab Two content.</p>
+          </pf-tab>
+        </pf-tabs>
+      </pf-tab>
+      <pf-tab tabTitle="Tab Two">
+        <pf-tabs class="nav nav-tabs nav-tabs-pf">
+          <pf-tab tabTitle="Tab Two Secondary Tab One" active="true">
+            <p>Tab Two Secondary Tab One content.</p>
+          </pf-tab>
+          <pf-tab tabTitle="Tab Two Secondary Tab Two">
+            <p>Tab Two Secondary Tab Two content.</p>
+          </pf-tab>
+        </pf-tabs>
       </pf-tab>
     </pf-tabs>
 
@@ -47,4 +72,5 @@
   <script src="//rawgit.com/webcomponents/custom-elements/master/src/native-shim.js"></script>
   <script src="../../dist/js/patternfly.js"></script>
 </body>
+
 </html>
