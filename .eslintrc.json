@@ -17,12 +17,29 @@
   "rules": {
     "quotes": 0,
     "camelcase": 2,
-    "indent": [2, 2, {"SwitchCase": 1}],
-    "new-cap": [2, {"newIsCap": true, "capIsNew": false}],
+    "indent": [
+      2,
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "new-cap": [
+      2,
+      {
+        "newIsCap": true,
+        "capIsNew": false
+      }
+    ],
     "no-mixed-spaces-and-tabs": 2,
     "no-multiple-empty-lines": 2,
     "no-trailing-spaces": 2,
-    "keyword-spacing": [2, {"after": true }],
+    "keyword-spacing": [
+      2,
+      {
+        "after": true
+      }
+    ],
     "space-before-blocks": 2,
     "space-infix-ops": 2,
     "brace-style": 2,
@@ -35,11 +52,16 @@
     "no-else-return": 2,
     "no-loop-func": 2,
     "vars-on-top": 2,
-    "no-debugger": 2,
+    "no-debugger": 1,
     "no-cond-assign": 2,
-    "no-console": 2,
+    "no-console": 1,
     "no-extra-semi": 2,
     "no-irregular-whitespace": 2,
-    "dot-notation": [2, {"allowPattern": "^[a-z]+(_[a-z]+)+$"}]
+    "dot-notation": [
+      2,
+      {
+        "allowPattern": "^[a-z]+(_[a-z]+)+$"
+      }
+    ]
   }
 }

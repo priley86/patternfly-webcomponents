@@ -59,6 +59,7 @@ export class PfTouchspin extends HTMLElement {
         return;
       }
 
+      console.log('mousedown');
       self._down();
       self._downSpin();
 
@@ -69,8 +70,12 @@ export class PfTouchspin extends HTMLElement {
     document.addEventListener('mouseup', function () {
 
       event.preventDefault();
-      clearInterval(this._downSpinTimer);
-      self._stop();
+
+      console.log('mouseup');
+      //wait until after the first delay and the first interval have passed
+      setTimeout(function () {
+        self._stop();
+      }, self._stepIntervalDelay + self._stepInterval);
     });
 
     up.addEventListener('mousedown', function (event) {
@@ -98,7 +103,7 @@ export class PfTouchspin extends HTMLElement {
     });
 
     document.addEventListener('wheel', function (event) {
-      var delta =  -event.deltaY;
+      var delta = -event.deltaY;
       if (input !== document.activeElement) {
         return;
       }
@@ -262,7 +267,15 @@ export class PfTouchspin extends HTMLElement {
    */
   _downSpin() {
     let self = this;
-    this._stop();
+    // this._stop();
+
+    //if we are already spinning down, return. no need for an additional down interval.
+    //we can still boost though...
+    console.log('_spinning:', this._spinning);
+    console.log('_downSpinTimer:', this._downSpinTimer);
+    if (this._spinning === 'down' || this._downSpinTimer) {
+      return;
+    }
 
     this.spincount = 0;
     this._spinning = 'down';
@@ -270,12 +283,14 @@ export class PfTouchspin extends HTMLElement {
     this.dispatchEvent(new CustomEvent('pf-touchspin.startspin', {}));
     this.dispatchEvent(new CustomEvent('pf-touchspin.startdownspin', {}));
 
-    this._downDelayTimeout = setTimeout(function () {
-      this._downSpinTimer = setInterval(function () {
+    this._downDelayTimeout = setTimeout(() => {
+      this._downSpinTimer = setInterval(() => {
+        console.log('down spin');
         self.spincount++;
         self._down();
-      }, this._stepInterval);
-    }, this._stepIntervalDelay);
+      }, self._stepInterval);
+      console.log('set down interval');
+    }, self._stepIntervalDelay);
   }
 
   /**
@@ -308,6 +323,9 @@ export class PfTouchspin extends HTMLElement {
     clearTimeout(this._upDelayTimeout);
     clearInterval(this._downSpinTimer);
     clearInterval(this._upSpinTimer);
+
+    this._downSpinTimer = null;
+    this._upSpinTimer = null;
 
     switch (this._spinning) {
       case 'up':
