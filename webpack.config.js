@@ -18,6 +18,7 @@ module.exports = {
     'pf-dropdown': './src/pf-dropdown/index',
     'pf-touchspin': './src/pf-touchspin/index',
     'pf-utilization-bar-chart': './src/pf-utilization-bar-chart/index',
+    'pf-modal': './src/pf-modal/index',
     'pf-utils': './src/pf-utils/index'
   },
 
@@ -34,6 +35,7 @@ module.exports = {
       path.join(__dirname, "src/pf-dropdown"),
       path.join(__dirname, "src/pf-touchspin"),
       path.join(__dirname, "src/pf-utilization-bar-chart"),
+      path.join(__dirname, "src/pf-modal"),
       path.join(__dirname, "src/pf-utils")
     ]
   },

@@ -1,33 +1,54 @@
 /**
  * <b>&lt;pf-touchspin&gt;</b> element for Patternfly Web Components
  *
- * <pf-touchspin></pf-touchspin>
+ * <pf-touchspin id="touchspin" class="input-group bootstrap-touchspin" decimals="2" step="0.1">
+ *  <span class="input-group-btn">
+ *    <button class="btn btn-default bootstrap-touchspin-down" type="button">-</button>
+ *  </span>
+ *  <input value="50.00" type="text" class="form-control">
+ *  <span class="input-group-btn">
+ *    <button class="btn btn-default bootstrap-touchspin-up" type="button">+</button>
+ *  </span>
+ * </pf-touchspin>
+ *
+ * @prop {number} min the minimum value
+ * @prop {number} max the maximum value
+ * @prop {number} step Increment/Decrement in value on up/down
+ * @prop {number} decimals decimal points in value
+ * @prop {boolean} booster if true, spinner will become faster continousally on holding down the button
+ * @prop {number} boostat boost at every nth step
+ * @prop {number} maxboostedstep maximum step when boosted
+ * @prop {number} stepinterval refresh reate of spinner in millisecond
+ * @prop {number} stepintervaldelay delay before sppiner starts to spin(millisecond)
+ * @prop {string} forcestepdivisibility force the value to be divisible by step value: 'none' | 'round' | 'floor' | 'ceil'
+ *
  */
 
 export class PfTouchspin extends HTMLElement {
 
   init() {
-    this._min = this.getAttribute('min') ? this.getAttribute('min') : 0;
-    this._max = this.getAttribute('max') ? this.getAttribute('max') : 100;
-    this._initVal = this.getAttribute('initval') ? this.getAttribute('initval') : "";
-    this._step = this.getAttribute('step') ? this.getAttribute('step') : 1;
-    this._decimals = this.getAttribute('decimals') ? this.getAttribute('decimals') : 0;
+    this._min = parseFloat(this.getAttribute('min')) ? this.getAttribute('min') : 0;
+    this._max = parseFloat(this.getAttribute('max')) ? this.getAttribute('max') : 100;
+    this._step = parseFloat(this.getAttribute('step')) ? this.getAttribute('step') : 1;
+    this._decimals = parseInt(this.getAttribute('decimals')) ? this.getAttribute('decimals') : 0;
     this._booster = this.getAttribute('booster') ? this.getAttribute('booster') : true;
-    this._boostat = this.getAttribute('boostat') ? this.getAttribute('boostat') : 10;
+    this._boostat = parseInt(this.getAttribute('boostat')) ? this.getAttribute('boostat') : 10;
     this._maxBoostedStep = this.getAttribute('maxboostedstep') ? this.getAttribute('maxboostedstep') : false;
     this._stepInterval = this.getAttribute('stepinterval') ? this.getAttribute('stepinterval') : 100;
     this._stepIntervalDelay = this.getAttribute('stepintervaldelay') ? this.getAttribute('stepintervaldelay') : 500;
+    this._forceStepDivisibility = this.getAttribute('forcestepdivisibility') ? this.getAttribute('forcestepdivisibility') : 'round';
     this._spinning = false;
+    this.spincount = 0;
   }
 
   connectedCallback() {
     let self = this;
-    var input = this.querySelector('input');
-    var down = this.querySelector('.bootstrap-touchspin-down');
-    var up = this.querySelector('.bootstrap-touchspin-up');
-    this.spincount = 0;
+    let input = this.querySelector('input');
+    let down = this.querySelector('.bootstrap-touchspin-down');
+    let up = this.querySelector('.bootstrap-touchspin-up');
     this.init();
 
+    // support for up/down keys
     input.addEventListener('keydown', function (event) {
       let keycode = event.keyCode ? event.keyCode : event.which;
       if (keycode === 38) {
@@ -54,12 +75,11 @@ export class PfTouchspin extends HTMLElement {
       }
     });
 
+    // support for click foe down spin
     down.addEventListener('mousedown', function (event) {
-      if (input.classList.contains(':disabled')) {
+      if (input.classList.contains('disabled')) {
         return;
       }
-
-      console.log('mousedown');
       self._down();
       self._downSpin();
 
@@ -67,19 +87,14 @@ export class PfTouchspin extends HTMLElement {
       event.stopPropagation();
     });
 
-    document.addEventListener('mouseup', function () {
+    document.addEventListener('mouseup', function (event) {
 
       event.preventDefault();
-
-      console.log('mouseup');
-      //wait until after the first delay and the first interval have passed
-      setTimeout(function () {
-        self._stop();
-      }, self._stepIntervalDelay + self._stepInterval);
+      self._stop();
     });
 
     up.addEventListener('mousedown', function (event) {
-      if (input.classList.contains(':disabled')) {
+      if (input.classList.contains('disabled')) {
         return;
       }
 
@@ -90,8 +105,8 @@ export class PfTouchspin extends HTMLElement {
       event.stopPropagation();
     });
 
+    // stop spinning if mouse is not over buttons
     down.addEventListener('mouseout', function (event) {
-
       event.stopPropagation();
       self._stop();
     });
@@ -102,8 +117,9 @@ export class PfTouchspin extends HTMLElement {
       self._stop();
     });
 
+    //support for mouse scroll
     document.addEventListener('wheel', function (event) {
-      var delta = -event.deltaY;
+      let delta = -event.deltaY;
       if (input !== document.activeElement) {
         return;
       }
@@ -136,19 +152,30 @@ export class PfTouchspin extends HTMLElement {
   }
 
   /**
+   * force the valur to be divisible by step
    *
+   * @param {number} value
+   */
+  _stepDivisibility(value) {
+    switch (this._forceStepDivisibility) {
+      case 'round':
+        return (Math.round(value / this._step) * this._step).toFixed(this._decimals);
+      case 'floor':
+        return (Math.floor(value / this._step) * this._step).toFixed(this._decimals);
+      case 'ceil':
+        return (Math.ceil(value / this._step) * this._step).toFixed(this._decimals);
+      default:
+        return value;
+    }
+  }
+
+  /**
+   * check the value before change in value
    */
   _checkValue() {
-    var val, parsedval, returnval;
+    let val, parsedval, returnval;
 
     val = this.querySelector('input').value;
-
-    if (val === '') {
-      if (this.replacementval !== '') {
-        this.querySelector('input').value = this.replacementval;
-      }
-      return;
-    }
 
     if (this._decimals > 0 && val === '.') {
       return;
@@ -157,11 +184,7 @@ export class PfTouchspin extends HTMLElement {
     parsedval = parseFloat(val);
 
     if (isNaN(parsedval)) {
-      if (this.replacementval !== '') {
-        parsedval = this.replacementval;
-      } else {
-        parsedval = 0;
-      }
+      parsedval = 0;
     }
 
     returnval = parsedval;
@@ -178,7 +201,7 @@ export class PfTouchspin extends HTMLElement {
       returnval = this.max;
     }
 
-    //returnval = _forcestepdivisibility(returnval);
+    returnval = this._stepDivisibility(returnval);
 
     if (Number(val).toString() !== returnval.toString()) {
       this.querySelector('input').value = returnval;
@@ -187,15 +210,13 @@ export class PfTouchspin extends HTMLElement {
 
 
   /**
+   * boost the value
    *
-   * @param {*} value
+   * @param {number} value
    */
   _boostedStep(value) {
     if (!this._booster) {
       return this._step;
-    }
-    if (isNaN(this.spincount)) {
-      this.spincount = 0;
     }
     let boosted = Math.pow(2, Math.floor(this.spincount / this._boostat)) * this._step;
 
@@ -205,7 +226,6 @@ export class PfTouchspin extends HTMLElement {
         value = Math.round((value / boosted)) * boosted;
       }
     }
-
     return Math.max(this._step, boosted);
 
   }
@@ -233,11 +253,13 @@ export class PfTouchspin extends HTMLElement {
       this._stop();
     }
 
-    this.querySelector('input').value = val.toFixed(this._decimals);
+    val = parseFloat(val).toFixed(this._decimals);
+
+    this.querySelector('input').value = val;
   }
 
   /**
-   *
+   *  decrement input value
    */
   _down() {
     let val, boostedStep;
@@ -259,10 +281,13 @@ export class PfTouchspin extends HTMLElement {
       this._stop();
     }
 
-    this.querySelector('input').value = val.toFixed(this._decimals);
+    val = parseFloat(val).toFixed(this._decimals);
+
+    this.querySelector('input').value = val;
   }
 
   /**
+   * Decremental spinner
    *
    */
   _downSpin() {
@@ -283,18 +308,16 @@ export class PfTouchspin extends HTMLElement {
     this.dispatchEvent(new CustomEvent('pf-touchspin.startspin', {}));
     this.dispatchEvent(new CustomEvent('pf-touchspin.startdownspin', {}));
 
-    this._downDelayTimeout = setTimeout(() => {
-      this._downSpinTimer = setInterval(() => {
-        console.log('down spin');
+    this._downDelayTimeout = setTimeout(function () {
+      self._downSpinTimer = setInterval(function () {
         self.spincount++;
         self._down();
       }, self._stepInterval);
-      console.log('set down interval');
-    }, self._stepIntervalDelay);
+    }, this._stepIntervalDelay);
   }
 
   /**
-   *
+   * Incremental spinner
    */
   _upSpin() {
     let self = this;
@@ -307,18 +330,18 @@ export class PfTouchspin extends HTMLElement {
     this.dispatchEvent(new CustomEvent('pf-touchspin.startupspin', {}));
 
     this._upDelayTimeout = setTimeout(function () {
-      this._upSpinTimer = setInterval(function () {
+      self._upSpinTimer = setInterval(function () {
         self.spincount++;
         self._up();
-      }, this._stepInterval);
+      }, self._stepInterval);
     }, this._stepIntervalDelay);
   }
 
   /**
+   * Stop the spinner
    *
    */
   _stop() {
-
     clearTimeout(this._downDelayTimeout);
     clearTimeout(this._upDelayTimeout);
     clearInterval(this._downSpinTimer);

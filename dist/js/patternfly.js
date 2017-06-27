@@ -70,20 +70,23 @@
 	/** PF Utilization Bar Chart **/
 	__webpack_require__(16);
 
+	/** PF Modal Component **/
+	__webpack_require__(19);
+
 	/** PF Utils **/
 	__webpack_require__(4);
 
 	/** PF I18N **/
-	__webpack_require__(19);
+	__webpack_require__(26);
 
 	/** PF Hello **/
-	__webpack_require__(21);
+	__webpack_require__(28);
 
 	/** PF Dropdown **/
-	__webpack_require__(23);
+	__webpack_require__(30);
 
 	/** PF Touchspin **/
-	__webpack_require__(24);
+	__webpack_require__(31);
 
 /***/ },
 /* 1 */
@@ -401,18 +404,23 @@
 	    value: function getClosest(el, s) {
 	      //el is the element and s the selector of the closest item to find
 	      // source http://gomakethings.com/climbing-up-and-down-the-dom-tree-with-vanilla-javascript/
-	      var f = s.charAt(0);
+	      var former = s.charAt(0);
+	      var latter = s.substr(1);
 	      for (; el && el !== document; el = el.parentNode) {
 	        // Get closest match
-	        if (f === '.') {
-	          // If selector is a class
-	          if (document.querySelector(s) !== undefined) {
+	        if (former === '#') {
+	          // If selector is an ID
+	          if (el.id === latter) {
 	            return el;
 	          }
-	        }
-	        if (f === '#') {
-	          // If selector is an ID
-	          if (el.id === s.substr(1)) {
+	        } else if (former === '.') {
+	          // If selector is a class
+	          if (new RegExp(latter).test(el.className)) {
+	            return el;
+	          }
+	        } else {
+	          // we assume other selector is tag name
+	          if (el.nodeName === s) {
 	            return el;
 	          }
 	        }
@@ -437,6 +445,25 @@
 	        y: window.pageYOffset || document.documentElement.scrollTop,
 	        x: window.pageXOffset || document.documentElement.scrollLeft
 	      };
+	    }
+	  }, {
+	    key: 'reflow',
+	    value: function reflow(el) {
+	      // force reflow
+	      return el.offsetHeight;
+	    }
+	  }, {
+	    key: 'once',
+	    value: function once(el, type, listener, self) {
+	      var one = function one(e) {
+	        try {
+	          listener.call(self, e);
+	        } finally {
+	          el.removeEventListener(type, one);
+	        }
+	      };
+
+	      el.addEventListener(type, one);
 	    }
 	  }]);
 
@@ -1161,19 +1188,23 @@
 	    key: '_makeTabsFromPfTab',
 	    value: function _makeTabsFromPfTab() {
 	      var ul = this.querySelector('ul');
-	      var pfTabs = this.querySelectorAll('pf-tab');
-	      [].forEach.call(pfTabs, function (pfTab, idx) {
-	        var tab = this._makeTab(pfTab);
-	        ul.appendChild(tab);
-	        this.tabMap.set(tab, pfTab);
-	        this.panelMap.set(pfTab, tab);
+	      if (this.children && this.children.length) {
+	        var pfTabs = [].slice.call(this.children).filter(function (node) {
+	          return node.nodeName === 'PF-TAB';
+	        });
+	        [].forEach.call(pfTabs, function (pfTab, idx) {
+	          var tab = this._makeTab(pfTab);
+	          ul.appendChild(tab);
+	          this.tabMap.set(tab, pfTab);
+	          this.panelMap.set(pfTab, tab);
 
-	        if (idx === 0) {
-	          this._makeActive(tab);
-	        } else {
-	          pfTab.style.display = 'none';
-	        }
-	      }.bind(this));
+	          if (idx === 0) {
+	            this._makeActive(tab);
+	          } else {
+	            pfTab.style.display = 'none';
+	          }
+	        }.bind(this));
+	      }
 	    }
 
 	    /**
@@ -2118,11 +2149,926 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.PfModal = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _pfUtils = __webpack_require__(4);
+
+	var _pfModalDialog = __webpack_require__(20);
+
+	var _pfModalDialog2 = _interopRequireDefault(_pfModalDialog);
+
+	var _pfModalContent = __webpack_require__(21);
+
+	var _pfModalContent2 = _interopRequireDefault(_pfModalContent);
+
+	var _pfModalHeader = __webpack_require__(22);
+
+	var _pfModalHeader2 = _interopRequireDefault(_pfModalHeader);
+
+	var _pfModalBody = __webpack_require__(24);
+
+	var _pfModalBody2 = _interopRequireDefault(_pfModalBody);
+
+	var _pfModalFooter = __webpack_require__(25);
+
+	var _pfModalFooter2 = _interopRequireDefault(_pfModalFooter);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/*
+	 * <b>&lt;pf-modal&gt;</b> element for Patternfly Web Components
+	 *
+	 * @example {@lang xml}
+	 * <pf-modal targetSelector="#btn-toggle-modal" backdrop keyboard>
+	 *   <pf-modal-dialog>
+	 *     <pf-modal-content>
+	 *       <pf-modal-header modalTitle="Modal Title"></pf-modal-header>
+	 *       <pf-modal-body>custom content</pf-modal-body>
+	 *       <pf-modal-footer></pf-modal-footer>
+	 *     </pf-modal-content>
+	 *   </pf-modal-dialog>
+	 * </pf-modal>
+	 *
+	 * @prop {string} targetSelector Indicating which element will fireup the modal
+	 * @prop {boolean} backdrop Indicating whether Clicking the backdrop could hide the modal or not
+	 * @prop {boolean} keyboard Indicating whether clicking the escape key could hide the modal or not
+	 * @prop {boolean} open Indicating whether or not the modal is opend
+	 *
+	 * @methods
+	 *
+	 * @show Show the modal
+	 * @hide Hide the modal
+	 * @toggle Toggle the visible/invisible state of modal
+	 *
+	 * @events
+	 *
+	 * @pf-modal.show It's fired immediately when the show instance method is called. If caused by a click,
+	 * the clicked element is available as the relatedTarget property of the event.detail
+	 * @pf-modal.shown It's fired when the modal has been made visible to the user (will wait for CSS transitions to complete). If caused by a click,
+	 * the clicked element is available as the relatedTarget property of the event.detail
+	 * @pf-modal.hide It's fired immediately when the hide instance method has been called
+	 * @pf-modal.hidden It's fired when the modal has finished being hidden from the user (will wait for CSS transitions to complete)
+	 */
+
+	var PfModal = exports.PfModal = function (_HTMLElement) {
+	  _inherits(PfModal, _HTMLElement);
+
+	  _createClass(PfModal, [{
+	    key: 'attributeChangedCallback',
+
+
+	    /*
+	     * Called when element's attribute value has changed
+	     *
+	     * @param {string} attrName The attribute name that has changed
+	     * @param {string} oldValue The old attribute value
+	     * @param {string} newValue The new attribute value
+	     */
+	    value: function attributeChangedCallback(attrName, oldValue, newValue) {
+	      if (attrName === 'targetselector' && newValue !== null && oldValue === null) {
+	        this._target = document.querySelector(newValue);
+	        if (this._target) {
+	          this._target.addEventListener('click', this.show.bind(this), false);
+	          this._target.setAttribute('data-bound', 'bound');
+	        }
+	      }
+	      if (attrName === 'open' && newValue !== null) {
+	        this._showModal();
+	      }
+	      if (attrName === 'keyboard') {
+	        if (newValue === '') {
+	          this.addEventListener('keydown', this._keydownHandler, false);
+	        } else {
+	          this.removeEventListener('keydown', this._keydownHandler, false);
+	        }
+	      }
+	    }
+
+	    /*
+	     * An instance of the element is created or upgraded
+	     */
+
+	  }, {
+	    key: 'open',
+
+
+	    /*
+	     * Get the show/hide state of modal
+	     *
+	     * @returns {boolean} True if modal is visible
+	     */
+	    get: function get() {
+	      return this.hasAttribute('open');
+	    }
+
+	    /*
+	     * Set flag indicating modal is shown
+	     *
+	     * @param {boolean} val True to set modal visible
+	     */
+	    ,
+	    set: function set(val) {
+	      if (this.open !== val) {
+	        if (val) {
+	          this.setAttribute('open', '');
+	        } else {
+	          this._hideModal();
+	        }
+	      }
+	    }
+
+	    /*
+	     * Get the backdrop setting
+	     *
+	     * @returns {boolean} True if users are allowed to hide modal on clicking backdrop
+	     */
+
+	  }, {
+	    key: 'backdrop',
+	    get: function get() {
+	      return this.hasAttribute('backdrop');
+	    }
+
+	    /*
+	     * Set flag indicating clicking backdrop of modal could hide modal
+	     *
+	     * @param {boolean} val True to enable backdrop clicking
+	     */
+	    ,
+	    set: function set(val) {
+	      if (this.backdrop !== val) {
+	        if (val) {
+	          this.setAttribute('backdrop', '');
+	        } else {
+	          this.removeAttribute('backdrop');
+	        }
+	      }
+	    }
+
+	    /*
+	     * Get the keyboard setting
+	     *
+	     * @returns {boolean} True if users are allowed to hide modal when escape key is pressed
+	     */
+
+	  }, {
+	    key: 'keyboard',
+	    get: function get() {
+	      return this.hasAttribute('keyboard');
+	    }
+
+	    /*
+	     * Set flag indicating pressing escape key could hide modal
+	     *
+	     * @param {boolean} val True to enable escape key reaction
+	     */
+	    ,
+	    set: function set(val) {
+	      if (this.keyboard !== val) {
+	        if (val) {
+	          this.setAttribute('keyboard', '');
+	        } else {
+	          this.removeAttribute('keyboard');
+	        }
+	      }
+	    }
+
+	    /*
+	     * Only attributes listed in the observedAttributes property will receive this callback
+	     */
+
+	  }], [{
+	    key: 'observedAttributes',
+	    get: function get() {
+	      return ['targetselector', 'open', 'keyboard', 'backdrop'];
+	    }
+	  }]);
+
+	  function PfModal() {
+	    _classCallCheck(this, PfModal);
+
+	    var _this = _possibleConstructorReturn(this, (PfModal.__proto__ || Object.getPrototypeOf(PfModal)).call(this));
+
+	    _this._mask = null;
+	    return _this;
+	  }
+
+	  /*
+	   * Called every time the element is inserted into the DOM
+	   */
+
+
+	  _createClass(PfModal, [{
+	    key: 'connectedCallback',
+	    value: function connectedCallback() {
+	      this.className = 'modal fade';
+	      this.setAttribute('tabindex', -1);
+
+	      if (this.open) {
+	        this._showModal();
+	      }
+
+	      if (this.getAttribute('targetSelector')) {
+	        this._target = document.querySelector(this.getAttribute('targetSelector'));
+	        if (this._target && !(this._target.getAttribute('data-bound') === 'bound')) {
+	          this._target.addEventListener('click', this.show.bind(this), false);
+	        }
+	      }
+
+	      this.addEventListener('click', this.hide, false);
+	    }
+
+	    /*
+	     * Show the modal when attribute open is added or property open is enabled
+	     * @private
+	     */
+
+	  }, {
+	    key: '_showModal',
+	    value: function _showModal() {
+	      _pfUtils.pfUtil.addClass(document.body, 'modal-open');
+	      this._mask = document.createElement('div');
+	      this._mask.className = 'modal-backdrop fade';
+	      document.body.appendChild(this._mask);
+	      _pfUtils.pfUtil.reflow(this._mask);
+	      _pfUtils.pfUtil.addClass(this._mask, 'in');
+	      _pfUtils.pfUtil.reflow(this);
+	      _pfUtils.pfUtil.addClass(this, 'in');
+	      _pfUtils.pfUtil.once(this.querySelector('pf-modal-dialog'), 'transitionend', this._afterShowModal, this);
+	    }
+
+	    /*
+	     * Show the modal
+	     * @public
+	     */
+
+	  }, {
+	    key: 'show',
+	    value: function show(e) {
+	      if (e) {
+	        this.dispatchEvent(new CustomEvent('pf-modal.show', { 'detail': { 'relatedTarget': e.currentTarget } }));
+	        this._triggeredByUser = true;
+	      } else {
+	        this.dispatchEvent(new CustomEvent('pf-modal.show', {}));
+	      }
+	      if (this.open) {
+	        return;
+	      }
+	      this.open = true;
+	    }
+
+	    /*
+	     * Callback after modal is shown
+	     * @private
+	     */
+
+	  }, {
+	    key: '_afterShowModal',
+	    value: function _afterShowModal() {
+	      this.focus();
+	      if (this._triggeredByUser) {
+	        this.dispatchEvent(new CustomEvent('pf-modal.shown', { 'detail': { 'relatedTarget': this._target } }));
+	      } else {
+	        this.dispatchEvent(new CustomEvent('pf-modal.shown', {}));
+	      }
+	      this._triggeredByUser = false;
+	    }
+
+	    /*
+	     * Hide the modal when attribute open is removed or property open is disabled
+	     * @private
+	     */
+
+	  }, {
+	    key: '_hideModal',
+	    value: function _hideModal() {
+	      _pfUtils.pfUtil.removeClass(document.body, 'modal-open');
+	      _pfUtils.pfUtil.removeClass(this._mask, 'in');
+	      _pfUtils.pfUtil.removeClass(this, 'in');
+	      _pfUtils.pfUtil.once(this, 'transitionend', this._afterHideModal, this);
+	    }
+
+	    /*
+	     * Hide the modal
+	     * @public
+	     */
+
+	  }, {
+	    key: 'hide',
+	    value: function hide(e) {
+	      if (e) {
+	        e.preventDefault();
+	        if (!(_pfUtils.pfUtil.getClosest(e.target, '.pf-hide-modal') || e.target === e.currentTarget && this.backdrop)) {
+	          return;
+	        }
+	      }
+
+	      this.dispatchEvent(new CustomEvent('pf-modal.hide', {}));
+
+	      if (!this.open) {
+	        return;
+	      }
+	      this._hideModal();
+	    }
+
+	    /*
+	     * Callback after the modal is hidden
+	     * @private
+	     */
+
+	  }, {
+	    key: '_afterHideModal',
+	    value: function _afterHideModal() {
+	      this.removeAttribute('open');
+	      if (this._mask) {
+	        this._mask.remove();
+	        this._mask = null;
+	      }
+	      this.dispatchEvent(new CustomEvent('pf-modal.hidden', {}));
+	    }
+
+	    /*
+	     * Toggle the visible/invisible state of modal
+	     * @public
+	     */
+
+	  }, {
+	    key: 'toggle',
+	    value: function toggle() {
+	      return this.open ? this.hide() : this.show();
+	    }
+
+	    /*
+	     * Handler of keydown event of escape key
+	     * @private
+	     */
+
+	  }, {
+	    key: '_keydownHandler',
+	    value: function _keydownHandler(e) {
+	      var isEscape = e.key && e.key === 'Escape' || e.keyIdentifier && e.keyIdentifier === 'U+001B' || e.keyCode && e.keyCode === 27 || e.which && e.which === 27;
+	      if (isEscape && this.open) {
+	        this.hide();
+	      }
+	    }
+	  }]);
+
+	  return PfModal;
+	}(HTMLElement);
+
+	window.customElements.define('pf-modal', PfModal);
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.PfModalDialog = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _pfUtils = __webpack_require__(4);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/*
+	 * <b>&lt;pf-modal-dialog&gt;</b> element for Patternfly Web Components
+	 *
+	 * @example {@lang xml}
+	 * <pf-modal targetSelector="#btn-toggle-modal" backdrop keyboard>
+	 *  <pf-modal-dialog>
+	 *   <pf-modal-content> practical content of pf-modal </pf-modal-content>
+	 *  </pf-modal-dialog>
+	 * </pf-modal>
+	 */
+
+	var PfModalDialog = exports.PfModalDialog = function (_HTMLElement) {
+	  _inherits(PfModalDialog, _HTMLElement);
+
+	  /*
+	   * An instance of the element is created or upgraded
+	   */
+	  function PfModalDialog() {
+	    _classCallCheck(this, PfModalDialog);
+
+	    return _possibleConstructorReturn(this, (PfModalDialog.__proto__ || Object.getPrototypeOf(PfModalDialog)).call(this));
+	  }
+
+	  /*
+	   * Called every time the element is inserted into the DOM
+	   */
+
+
+	  _createClass(PfModalDialog, [{
+	    key: 'connectedCallback',
+	    value: function connectedCallback() {
+	      _pfUtils.pfUtil.addClass(this, 'modal-dialog');
+	    }
+	  }]);
+
+	  return PfModalDialog;
+	}(HTMLElement);
+
+	window.customElements.define('pf-modal-dialog', PfModalDialog);
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.PfModalContent = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _pfUtils = __webpack_require__(4);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/*
+	 * <b>&lt;pf-modal-content&gt;</b> element for Patternfly Web Components
+	 *
+	 * @example {@lang xml}
+	 * <pf-modal targetSelector="#btn-toggle-modal" backdrop keyboard>
+	 *  <pf-modal-dialog>
+	 *   <pf-modal-content> practical content of pf-modal </pf-modal-content>
+	 *  </pf-modal-dialog>
+	 * </pf-modal>
+	 */
+
+	var PfModalContent = exports.PfModalContent = function (_HTMLElement) {
+	  _inherits(PfModalContent, _HTMLElement);
+
+	  /*
+	   * An instance of the element is created or upgraded
+	   */
+	  function PfModalContent() {
+	    _classCallCheck(this, PfModalContent);
+
+	    return _possibleConstructorReturn(this, (PfModalContent.__proto__ || Object.getPrototypeOf(PfModalContent)).call(this));
+	  }
+
+	  /*
+	   * Called every time the element is inserted into the DOM
+	   */
+
+
+	  _createClass(PfModalContent, [{
+	    key: 'connectedCallback',
+	    value: function connectedCallback() {
+	      _pfUtils.pfUtil.addClass(this, 'modal-content');
+	    }
+	  }]);
+
+	  return PfModalContent;
+	}(HTMLElement);
+
+	window.customElements.define('pf-modal-content', PfModalContent);
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.PfModalHeader = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _pfUtils = __webpack_require__(4);
+
+	var _pfModalHeader = __webpack_require__(23);
+
+	var _pfModalHeader2 = _interopRequireDefault(_pfModalHeader);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/*
+	 * <b>&lt;pf-modal-header&gt;</b> element for Patternfly Web Components
+	 *
+	 * @example {@lang xml}
+	 * <pf-modal-header modalTitle="Modal Title"></pf-modal-header>
+	 */
+
+	var PfModalHeader = exports.PfModalHeader = function (_HTMLElement) {
+	  _inherits(PfModalHeader, _HTMLElement);
+
+	  /*
+	   * An instance of the element is created or upgraded
+	   */
+	  function PfModalHeader() {
+	    _classCallCheck(this, PfModalHeader);
+
+	    return _possibleConstructorReturn(this, (PfModalHeader.__proto__ || Object.getPrototypeOf(PfModalHeader)).call(this));
+	  }
+
+	  /*
+	   * Called every time the element is inserted into the DOM
+	   */
+
+
+	  _createClass(PfModalHeader, [{
+	    key: 'connectedCallback',
+	    value: function connectedCallback() {
+	      _pfUtils.pfUtil.addClass(this, 'modal-header');
+
+	      if (!this.querySelector('.pf-hide-modal')) {
+	        this._template = document.createElement('template');
+	        this._template.innerHTML = _pfModalHeader2.default;
+	        this.appendChild(this._template.content);
+	      }
+	      if (this.modalTitle) {
+	        this._addModalTitle();
+	      }
+	    }
+
+	    /*
+	    * Append cancel button
+	    *
+	    * @private
+	    */
+
+	  }, {
+	    key: '_addModalTitle',
+	    value: function _addModalTitle() {
+	      if (!this.querySelector('.modal-title')) {
+	        this.insertAdjacentHTML('beforeend', '<h4 class="modal-title">' + this.modalTitle + '</h4>');
+	      }
+	    }
+
+	    /*
+	     * Get modalTitle
+	     *
+	     * @returns {string} The modal title
+	     */
+
+	  }, {
+	    key: 'attributeChangedCallback',
+
+
+	    /*
+	     * Called when element's attribute value has changed
+	     *
+	     * @param {string} attrName The attribute name that has changed
+	     * @param {string} oldValue The old attribute value
+	     * @param {string} newValue The new attribute value
+	     */
+	    value: function attributeChangedCallback(attrName, oldValue, newValue) {
+	      if (attrName === 'modaltitle') {
+	        if (newValue && !oldValue) {
+	          this._addModalTitle();
+	        }
+	        if (newValue && oldValue) {
+	          this.querySelector('.modal-title').textContent = this.modalTitle;
+	        }
+	        if (!newValue) {
+	          var title = this.querySelector('.modal-title');
+	          title.parentNode.removeChild(title);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'modalTitle',
+	    get: function get() {
+	      return this.getAttribute('modalTitle');
+	    }
+
+	    /*
+	     * Set modalTitle
+	     *
+	     * @param {string} val Modal title
+	     */
+	    ,
+	    set: function set(val) {
+	      if (val) {
+	        this.setAttribute('modalTitle', val);
+	      } else {
+	        this.removeAttribute('modalTitle');
+	      }
+	    }
+
+	    /*
+	     * Only attributes listed in the observedAttributes property will receive this callback
+	     */
+
+	  }], [{
+	    key: 'observedAttributes',
+	    get: function get() {
+	      return ['modaltitle'];
+	    }
+	  }]);
+
+	  return PfModalHeader;
+	}(HTMLElement);
+
+	window.customElements.define('pf-modal-header', PfModalHeader);
+
+/***/ },
+/* 23 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var PfModalHeaderTemplate = "\n<button type=\"button\" class=\"close pf-hide-modal\" aria-hidden=\"true\">\n  <span class=\"pficon pficon-close\"></span>\n</button>\n";
+	exports.default = PfModalHeaderTemplate;
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.PfModalBody = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _pfUtils = __webpack_require__(4);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/*
+	 * <b>&lt;pf-modal-body&gt;</b> element for Patternfly Web Components
+	 *
+	 * @example {@lang xml}
+	 * <pf-modal-body>custom content of mdoal-body</pf-modal-body>
+	 */
+
+	var PfModalBody = exports.PfModalBody = function (_HTMLElement) {
+	  _inherits(PfModalBody, _HTMLElement);
+
+	  /*
+	   * An instance of the element is created or upgraded
+	   */
+	  function PfModalBody() {
+	    _classCallCheck(this, PfModalBody);
+
+	    return _possibleConstructorReturn(this, (PfModalBody.__proto__ || Object.getPrototypeOf(PfModalBody)).call(this));
+	  }
+
+	  /*
+	   * Called every time the element is inserted into the DOM
+	   */
+
+
+	  _createClass(PfModalBody, [{
+	    key: 'connectedCallback',
+	    value: function connectedCallback() {
+	      _pfUtils.pfUtil.addClass(this, 'modal-body');
+	    }
+	  }]);
+
+	  return PfModalBody;
+	}(HTMLElement);
+
+	window.customElements.define('pf-modal-body', PfModalBody);
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.PfModalFooter = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _pfUtils = __webpack_require__(4);
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/*
+	 * <b>&lt;pf-modal-footer&gt;</b> element for Patternfly Web Components
+	 *
+	 * @example {@lang xml}
+	 * <pf-modal-footer></pf-modal-footer>
+	 */
+
+	var PfModalFooter = exports.PfModalFooter = function (_HTMLElement) {
+	  _inherits(PfModalFooter, _HTMLElement);
+
+	  /*
+	   * An instance of the element is created or upgraded
+	   */
+	  function PfModalFooter() {
+	    _classCallCheck(this, PfModalFooter);
+
+	    return _possibleConstructorReturn(this, (PfModalFooter.__proto__ || Object.getPrototypeOf(PfModalFooter)).call(this));
+	  }
+
+	  /*
+	   * Called every time the element is inserted into the DOM
+	   */
+
+
+	  _createClass(PfModalFooter, [{
+	    key: 'connectedCallback',
+	    value: function connectedCallback() {
+	      _pfUtils.pfUtil.addClass(this, 'modal-footer');
+
+	      if (this.cancelCaption) {
+	        this._addCancelBtn();
+	      }
+	      if (this.saveCaption) {
+	        this._addSaveBtn();
+	      }
+	    }
+
+	    /*
+	     * Append cancel button
+	     *
+	     * @private
+	     */
+
+	  }, {
+	    key: '_addCancelBtn',
+	    value: function _addCancelBtn() {
+	      if (!this.querySelector('.btn-default')) {
+	        this.insertAdjacentHTML('beforeend', '<button type="button" class="btn btn-default pf-hide-modal">' + this.cancelCaption + '</button>');
+	      }
+	    }
+
+	    /*
+	     * Append save button
+	     *
+	     * @private
+	     */
+
+	  }, {
+	    key: '_addSaveBtn',
+	    value: function _addSaveBtn() {
+	      if (!this.querySelector('.btn-primary')) {
+	        this.insertAdjacentHTML('beforeend', '<button type="button" class="btn btn-primary">' + this.saveCaption + '</button>');
+	      }
+	    }
+
+	    /*
+	     * Get cancelCaption
+	     *
+	     * @returns {string} The cancelCaption
+	     */
+
+	  }, {
+	    key: 'attributeChangedCallback',
+
+
+	    /*
+	     * Called when element's attribute value has changed
+	     *
+	     * @param {string} attrName The attribute name that has changed
+	     * @param {string} oldValue The old attribute value
+	     * @param {string} newValue The new attribute value
+	     */
+	    value: function attributeChangedCallback(attrName, oldValue, newValue) {
+	      if (attrName === 'cancelcaption') {
+	        if (newValue && !oldValue) {
+	          this._addCancelBtn(newValue);
+	        }
+	        if (newValue && oldValue) {
+	          this.querySelector('.btn-default').textContent = this.cancelCaption;
+	        }
+	        if (!newValue) {
+	          var btn = this.querySelector('.btn-default');
+	          btn.parentNode.removeChild(btn);
+	        }
+	      }
+	      if (attrName === 'savecaption') {
+	        if (newValue && !oldValue) {
+	          this._addSaveBtn(newValue);
+	        }
+	        if (newValue && oldValue) {
+	          this.querySelector('.btn-primary').textContent = this.saveCaption;
+	        }
+	        if (!newValue) {
+	          var _btn = this.querySelector('.btn-primary');
+	          _btn.parentNode.removeChild(_btn);
+	        }
+	      }
+	    }
+	  }, {
+	    key: 'cancelCaption',
+	    get: function get() {
+	      return this.getAttribute('cancelCaption');
+	    }
+
+	    /*
+	     * Set cancelCaption
+	     *
+	     * @param {string} val Caption of cancel button
+	     */
+	    ,
+	    set: function set(val) {
+	      if (val) {
+	        this.setAttribute('cancelCaption', val);
+	      } else {
+	        this.removeAttribute('cancelCaption');
+	      }
+	    }
+
+	    /*
+	     * Get saveCaption
+	     *
+	     * @returns {string} The saveCaption
+	     */
+
+	  }, {
+	    key: 'saveCaption',
+	    get: function get() {
+	      return this.getAttribute('saveCaption');
+	    }
+
+	    /*
+	     * Set saveCaption
+	     *
+	     * @param {string} val Caption of save button
+	     */
+	    ,
+	    set: function set(val) {
+	      if (val) {
+	        this.setAttribute('saveCaption', val);
+	      } else {
+	        this.removeAttribute('saveCaption');
+	      }
+	    }
+
+	    /*
+	     * Only attributes listed in the observedAttributes property will receive this callback
+	     */
+
+	  }], [{
+	    key: 'observedAttributes',
+	    get: function get() {
+	      return ['cancelcaption', 'savecaption'];
+	    }
+	  }]);
+
+	  return PfModalFooter;
+	}(HTMLElement);
+
+	window.customElements.define('pf-modal-footer', PfModalFooter);
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 	exports.PfI18n = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _i18nUtils = __webpack_require__(20);
+	var _i18nUtils = __webpack_require__(27);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2265,7 +3211,7 @@
 	window.customElements.define('pf-i18n', PfI18n);
 
 /***/ },
-/* 20 */
+/* 27 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2317,7 +3263,7 @@
 	exports.i18n = i18n;
 
 /***/ },
-/* 21 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2329,11 +3275,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _pfHello = __webpack_require__(22);
+	var _pfHello = __webpack_require__(29);
 
 	var _pfHello2 = _interopRequireDefault(_pfHello);
 
-	var _i18nUtils = __webpack_require__(20);
+	var _i18nUtils = __webpack_require__(27);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2442,7 +3388,7 @@
 	window.customElements.define('pf-hello', PfHello);
 
 /***/ },
-/* 22 */
+/* 29 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2454,7 +3400,7 @@
 	exports.default = PfHelloTemplate;
 
 /***/ },
-/* 23 */
+/* 30 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2709,7 +3655,7 @@
 	window.customElements.define('pf-dropdown', PfDropdown);
 
 /***/ },
-/* 24 */
+/* 31 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2729,7 +3675,27 @@
 	/**
 	 * <b>&lt;pf-touchspin&gt;</b> element for Patternfly Web Components
 	 *
-	 * <pf-touchspin></pf-touchspin>
+	 * <pf-touchspin id="touchspin" class="input-group bootstrap-touchspin" decimals="2" step="0.1">
+	 *  <span class="input-group-btn">
+	 *    <button class="btn btn-default bootstrap-touchspin-down" type="button">-</button>
+	 *  </span>
+	 *  <input value="50.00" type="text" class="form-control">
+	 *  <span class="input-group-btn">
+	 *    <button class="btn btn-default bootstrap-touchspin-up" type="button">+</button>
+	 *  </span>
+	 * </pf-touchspin>
+	 *
+	 * @prop {number} min the minimum value
+	 * @prop {number} max the maximum value
+	 * @prop {number} step Increment/Decrement in value on up/down
+	 * @prop {number} decimals decimal points in value
+	 * @prop {boolean} booster if true, spinner will become faster continousally on holding down the button
+	 * @prop {number} boostat boost at every nth step
+	 * @prop {number} maxboostedstep maximum step when boosted
+	 * @prop {number} stepinterval refresh reate of spinner in millisecond
+	 * @prop {number} stepintervaldelay delay before sppiner starts to spin(millisecond)
+	 * @prop {string} forcestepdivisibility force the value to be divisible by step value: 'none' | 'round' | 'floor' | 'ceil'
+	 *
 	 */
 
 	var PfTouchspin = exports.PfTouchspin = function (_HTMLElement) {
@@ -2738,17 +3704,18 @@
 	  _createClass(PfTouchspin, [{
 	    key: 'init',
 	    value: function init() {
-	      this._min = this.getAttribute('min') ? this.getAttribute('min') : 0;
-	      this._max = this.getAttribute('max') ? this.getAttribute('max') : 100;
-	      this._initVal = this.getAttribute('initval') ? this.getAttribute('initval') : "";
-	      this._step = this.getAttribute('step') ? this.getAttribute('step') : 1;
-	      this._decimals = this.getAttribute('decimals') ? this.getAttribute('decimals') : 0;
+	      this._min = parseFloat(this.getAttribute('min')) ? this.getAttribute('min') : 0;
+	      this._max = parseFloat(this.getAttribute('max')) ? this.getAttribute('max') : 100;
+	      this._step = parseFloat(this.getAttribute('step')) ? this.getAttribute('step') : 1;
+	      this._decimals = parseInt(this.getAttribute('decimals')) ? this.getAttribute('decimals') : 0;
 	      this._booster = this.getAttribute('booster') ? this.getAttribute('booster') : true;
-	      this._boostat = this.getAttribute('boostat') ? this.getAttribute('boostat') : 10;
+	      this._boostat = parseInt(this.getAttribute('boostat')) ? this.getAttribute('boostat') : 10;
 	      this._maxBoostedStep = this.getAttribute('maxboostedstep') ? this.getAttribute('maxboostedstep') : false;
 	      this._stepInterval = this.getAttribute('stepinterval') ? this.getAttribute('stepinterval') : 100;
 	      this._stepIntervalDelay = this.getAttribute('stepintervaldelay') ? this.getAttribute('stepintervaldelay') : 500;
+	      this._forceStepDivisibility = this.getAttribute('forcestepdivisibility') ? this.getAttribute('forcestepdivisibility') : 'round';
 	      this._spinning = false;
+	      this.spincount = 0;
 	    }
 	  }, {
 	    key: 'connectedCallback',
@@ -2757,9 +3724,9 @@
 	      var input = this.querySelector('input');
 	      var down = this.querySelector('.bootstrap-touchspin-down');
 	      var up = this.querySelector('.bootstrap-touchspin-up');
-	      this.spincount = 0;
 	      this.init();
 
+	      // support for up/down keys
 	      input.addEventListener('keydown', function (event) {
 	        var keycode = event.keyCode ? event.keyCode : event.which;
 	        if (keycode === 38) {
@@ -2786,12 +3753,11 @@
 	        }
 	      });
 
+	      // support for click foe down spin
 	      down.addEventListener('mousedown', function (event) {
-	        if (input.classList.contains(':disabled')) {
+	        if (input.classList.contains('disabled')) {
 	          return;
 	        }
-
-	        console.log('mousedown');
 	        self._down();
 	        self._downSpin();
 
@@ -2799,19 +3765,14 @@
 	        event.stopPropagation();
 	      });
 
-	      document.addEventListener('mouseup', function () {
+	      document.addEventListener('mouseup', function (event) {
 
 	        event.preventDefault();
-
-	        console.log('mouseup');
-	        //wait until after the first delay and the first interval have passed
-	        setTimeout(function () {
-	          self._stop();
-	        }, self._stepIntervalDelay + self._stepInterval);
+	        self._stop();
 	      });
 
 	      up.addEventListener('mousedown', function (event) {
-	        if (input.classList.contains(':disabled')) {
+	        if (input.classList.contains('disabled')) {
 	          return;
 	        }
 
@@ -2822,8 +3783,8 @@
 	        event.stopPropagation();
 	      });
 
+	      // stop spinning if mouse is not over buttons
 	      down.addEventListener('mouseout', function (event) {
-
 	        event.stopPropagation();
 	        self._stop();
 	      });
@@ -2834,6 +3795,7 @@
 	        self._stop();
 	      });
 
+	      //support for mouse scroll
 	      document.addEventListener('wheel', function (event) {
 	        var delta = -event.deltaY;
 	        if (input !== document.activeElement) {
@@ -2876,23 +3838,39 @@
 	  }
 
 	  /**
+	   * force the valur to be divisible by step
 	   *
+	   * @param {number} value
 	   */
 
 
 	  _createClass(PfTouchspin, [{
+	    key: '_stepDivisibility',
+	    value: function _stepDivisibility(value) {
+	      switch (this._forceStepDivisibility) {
+	        case 'round':
+	          return (Math.round(value / this._step) * this._step).toFixed(this._decimals);
+	        case 'floor':
+	          return (Math.floor(value / this._step) * this._step).toFixed(this._decimals);
+	        case 'ceil':
+	          return (Math.ceil(value / this._step) * this._step).toFixed(this._decimals);
+	        default:
+	          return value;
+	      }
+	    }
+
+	    /**
+	     * check the value before change in value
+	     */
+
+	  }, {
 	    key: '_checkValue',
 	    value: function _checkValue() {
-	      var val, parsedval, returnval;
+	      var val = void 0,
+	          parsedval = void 0,
+	          returnval = void 0;
 
 	      val = this.querySelector('input').value;
-
-	      if (val === '') {
-	        if (this.replacementval !== '') {
-	          this.querySelector('input').value = this.replacementval;
-	        }
-	        return;
-	      }
 
 	      if (this._decimals > 0 && val === '.') {
 	        return;
@@ -2901,11 +3879,7 @@
 	      parsedval = parseFloat(val);
 
 	      if (isNaN(parsedval)) {
-	        if (this.replacementval !== '') {
-	          parsedval = this.replacementval;
-	        } else {
-	          parsedval = 0;
-	        }
+	        parsedval = 0;
 	      }
 
 	      returnval = parsedval;
@@ -2922,7 +3896,7 @@
 	        returnval = this.max;
 	      }
 
-	      //returnval = _forcestepdivisibility(returnval);
+	      returnval = this._stepDivisibility(returnval);
 
 	      if (Number(val).toString() !== returnval.toString()) {
 	        this.querySelector('input').value = returnval;
@@ -2930,8 +3904,9 @@
 	    }
 
 	    /**
+	     * boost the value
 	     *
-	     * @param {*} value
+	     * @param {number} value
 	     */
 
 	  }, {
@@ -2939,9 +3914,6 @@
 	    value: function _boostedStep(value) {
 	      if (!this._booster) {
 	        return this._step;
-	      }
-	      if (isNaN(this.spincount)) {
-	        this.spincount = 0;
 	      }
 	      var boosted = Math.pow(2, Math.floor(this.spincount / this._boostat)) * this._step;
 
@@ -2951,7 +3923,6 @@
 	          value = Math.round(value / boosted) * boosted;
 	        }
 	      }
-
 	      return Math.max(this._step, boosted);
 	    }
 
@@ -2982,11 +3953,13 @@
 	        this._stop();
 	      }
 
-	      this.querySelector('input').value = val.toFixed(this._decimals);
+	      val = parseFloat(val).toFixed(this._decimals);
+
+	      this.querySelector('input').value = val;
 	    }
 
 	    /**
-	     *
+	     *  decrement input value
 	     */
 
 	  }, {
@@ -3012,28 +3985,21 @@
 	        this._stop();
 	      }
 
-	      this.querySelector('input').value = val.toFixed(this._decimals);
+	      val = parseFloat(val).toFixed(this._decimals);
+
+	      this.querySelector('input').value = val;
 	    }
 
 	    /**
+	     * Decremental spinner
 	     *
 	     */
 
 	  }, {
 	    key: '_downSpin',
 	    value: function _downSpin() {
-	      var _this2 = this;
-
 	      var self = this;
-	      // this._stop();
-
-	      //if we are already spinning down, return. no need for an additional down interval.
-	      //we can still boost though...
-	      console.log('_spinning:', this._spinning);
-	      console.log('_downSpinTimer:', this._downSpinTimer);
-	      if (this._spinning === 'down' || this._downSpinTimer) {
-	        return;
-	      }
+	      this._stop();
 
 	      this.spincount = 0;
 	      this._spinning = 'down';
@@ -3042,17 +4008,15 @@
 	      this.dispatchEvent(new CustomEvent('pf-touchspin.startdownspin', {}));
 
 	      this._downDelayTimeout = setTimeout(function () {
-	        _this2._downSpinTimer = setInterval(function () {
-	          console.log('down spin');
+	        self._downSpinTimer = setInterval(function () {
 	          self.spincount++;
 	          self._down();
 	        }, self._stepInterval);
-	        console.log('set down interval');
-	      }, self._stepIntervalDelay);
+	      }, this._stepIntervalDelay);
 	    }
 
 	    /**
-	     *
+	     * Incremental spinner
 	     */
 
 	  }, {
@@ -3068,28 +4032,25 @@
 	      this.dispatchEvent(new CustomEvent('pf-touchspin.startupspin', {}));
 
 	      this._upDelayTimeout = setTimeout(function () {
-	        this._upSpinTimer = setInterval(function () {
+	        self._upSpinTimer = setInterval(function () {
 	          self.spincount++;
 	          self._up();
-	        }, this._stepInterval);
+	        }, self._stepInterval);
 	      }, this._stepIntervalDelay);
 	    }
 
 	    /**
+	     * Stop the spinner
 	     *
 	     */
 
 	  }, {
 	    key: '_stop',
 	    value: function _stop() {
-
 	      clearTimeout(this._downDelayTimeout);
 	      clearTimeout(this._upDelayTimeout);
 	      clearInterval(this._downSpinTimer);
 	      clearInterval(this._upSpinTimer);
-
-	      this._downSpinTimer = null;
-	      this._upSpinTimer = null;
 
 	      switch (this._spinning) {
 	        case 'up':
