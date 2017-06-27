@@ -43,9 +43,9 @@ export class PfTouchspin extends HTMLElement {
 
   connectedCallback() {
     let self = this;
-    var input = this.querySelector('input');
-    var down = this.querySelector('.bootstrap-touchspin-down');
-    var up = this.querySelector('.bootstrap-touchspin-up');
+    let input = this.querySelector('input');
+    let down = this.querySelector('.bootstrap-touchspin-down');
+    let up = this.querySelector('.bootstrap-touchspin-up');
     this.init();
 
     // support for up/down keys
@@ -119,7 +119,7 @@ export class PfTouchspin extends HTMLElement {
 
     //support for mouse scroll
     document.addEventListener('wheel', function (event) {
-      var delta = -event.deltaY;
+      let delta = -event.deltaY;
       if (input !== document.activeElement) {
         return;
       }
@@ -173,7 +173,7 @@ export class PfTouchspin extends HTMLElement {
    * check the value before change in value
    */
   _checkValue() {
-    var val, parsedval, returnval;
+    let val, parsedval, returnval;
 
     val = this.querySelector('input').value;
 
