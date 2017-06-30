@@ -131,6 +131,11 @@ export class PfTouchspin extends HTMLElement {
         self._up();
       }
     });
+
+    this._bindEvents();
+
+    this.initialized = true;
+    this.dispatchEvent(new CustomEvent('initialized', {}));
   }
 
   /**
@@ -149,6 +154,33 @@ export class PfTouchspin extends HTMLElement {
    */
   constructor() {
     super();
+  }
+
+  /**
+   *
+   */
+  _bindEvents() {
+    this.addEventListener('pf-touchspin.downonce', function () {
+      this._down();
+    });
+
+    this.addEventListener('pf-touchspin.uponce', function () {
+      this._up();
+    });
+
+    this.addEventListener('pf-touchspin.downspin', function () {
+      this._downSpin();
+    });
+
+    this.addEventListener('pf-touchspin.upspin', function () {
+      this._upSpin();
+    });
+
+    this.addEventListener('pf-touchspin.stop', function () {
+      this._stop();
+    });
+
+
   }
 
   /**
@@ -188,10 +220,6 @@ export class PfTouchspin extends HTMLElement {
     }
 
     returnval = parsedval;
-
-    if (parsedval.toString() !== val) {
-      returnval = parsedval;
-    }
 
     if (parsedval < this.min) {
       returnval = this.min;
@@ -292,15 +320,7 @@ export class PfTouchspin extends HTMLElement {
    */
   _downSpin() {
     let self = this;
-    // this._stop();
-
-    //if we are already spinning down, return. no need for an additional down interval.
-    //we can still boost though...
-    console.log('_spinning:', this._spinning);
-    console.log('_downSpinTimer:', this._downSpinTimer);
-    if (this._spinning === 'down' || this._downSpinTimer) {
-      return;
-    }
+    this._stop();
 
     this.spincount = 0;
     this._spinning = 'down';
@@ -346,9 +366,6 @@ export class PfTouchspin extends HTMLElement {
     clearTimeout(this._upDelayTimeout);
     clearInterval(this._downSpinTimer);
     clearInterval(this._upSpinTimer);
-
-    this._downSpinTimer = null;
-    this._upSpinTimer = null;
 
     switch (this._spinning) {
       case 'up':
