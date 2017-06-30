@@ -7,7 +7,7 @@ describe("Patternfly Touchspin Component Tests", function () {
     document.body.appendChild(document.importNode(template.content, true));
   }
   beforeEach(function () {
-    buildHtml('<pf-touchspin id="touchspin" class="input-group bootstrap-touchspin"><span class="input-group-btn"><button id="button-down" class="btn btn-default bootstrap-touchspin-down" type="button">-</button></span><input value="50" type="text" class="form-control"><span class="input-group-btn"><button class="btn btn-default bootstrap-touchspin-up" type="button">+</button></span></pf-touchspin>');
+    buildHtml('<pf-touchspin id="touchspin" class="input-group bootstrap-touchspin" min="0" max="100"><span class="input-group-btn"><button id="button-down" class="btn btn-default bootstrap-touchspin-down" type="button">-</button></span><input value="50" type="text" class="form-control"><span class="input-group-btn"><button class="btn btn-default bootstrap-touchspin-up" type="button">+</button></span></pf-touchspin>');
     customElement = document.querySelector('#touchspin');
     downbtn = document.querySelector(".bootstrap-touchspin-down");
     upbtn = document.querySelector(".bootstrap-touchspin-up");
@@ -29,54 +29,49 @@ describe("Patternfly Touchspin Component Tests", function () {
     input = null;
   });
 
-  it("should decrement and increment input value on _bindEvent", function (done) {
-
+  it("should decrement value on pf-touchspin.downonce event", function () {
     customElement.dispatchEvent(new CustomEvent('pf-touchspin.downonce', {}));
     expect(input.value).toEqual('49');
+  });
 
+  it("should increment value on pf-touchspin.uponce event", function () {
     customElement.dispatchEvent(new CustomEvent('pf-touchspin.uponce', {}));
-    expect(input.value).toEqual('50');
-
-    done();
+    expect(input.value).toEqual('51');
   });
 
-  it("should decrement or increment value on click", function (done) {
+  it("should decrement value on down button mousedown", function () {
     downbtn.dispatchEvent(new MouseEvent('mousedown'));
-    customElement.addEventListener('pf-touchspin.startdownspin', function () {
-      documen.addEventListener(new MouseEvent('mouseup'));
-    });
     expect(input.value).toEqual('49');
-
-    upbtn.dispatchEvent(new MouseEvent('mousedown'));
-    customElement.addEventListener('pf-touchspin.startupspin', function () {
-      documen.addEventListener(new MouseEvent('mouseup'));
-    });
-    expect(input.value).toEqual('50');
-    done();
   });
 
-  it("should fire pf-touchspin.startspin event", function (done) {
+  it("should increment value on up button mousedown", function () {
+    upbtn.dispatchEvent(new MouseEvent('mousedown'));
+    expect(input.value).toEqual('51');
+  });
+
+
+  it("should fire pf-touchspin.startspin event on down button mousedown", function () {
     downbtn.dispatchEvent(new MouseEvent('mousedown'));
     customElement.addEventListener('pf-touchspin.startspin', eventCallback.eventHandle());
     expect(eventCallback.eventHandle).toHaveBeenCalled();
-    done();
   });
 
   it("should fire pf-touchspin.max event", function () {
-
+    input.value = 100;
     upbtn.dispatchEvent(new MouseEvent('mousedown'));
     customElement.addEventListener('pf-touchspin.max', eventCallback.eventHandle());
     expect(eventCallback.eventHandle).toHaveBeenCalled();
   });
 
   it("should fire pf-touchspin.min event", function () {
+    input.value = 0;
     downbtn.dispatchEvent(new MouseEvent('mouseup'));
     customElement.addEventListener('pf-touchspin.min', eventCallback.eventHandle());
     expect(eventCallback.eventHandle).toHaveBeenCalled();
   });
 
-  it("should fire pf-touchspin.stopspin", function (done) {
-    downbtn.dispatchEvent(new MouseEvent('mouseDown'));
+  it("should fire pf-touchspin.stopspin on down button mouseup", function (done) {
+    downbtn.dispatchEvent(new MouseEvent('mousedown'));
     document.dispatchEvent(new MouseEvent('mouseup'));
     customElement.addEventListener('pf-touchspin.stopspin', eventCallback.eventFakeHandle());
     expect(eventCallback.eventFakeHandle).toHaveBeenCalled();
