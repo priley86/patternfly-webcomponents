@@ -2,7 +2,7 @@
   "name": "patternfly-webcomponents",
   "version": "0.0.8",
   "description": "PatternFly Web Components",
-  "main": "dist/js/patternfly.js",
+  "main": "dist/js/index.js",
   "author": "Red Hat",
   "license": "Apache-2.0",
   "devDependencies": {
