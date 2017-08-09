@@ -290,7 +290,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
       tabAnchor.innerHTML = pfTab.innerHTML;
 
       tabAnchor.onclick = function (e) {
-        event.preventDefault();
+        e.preventDefault();
         _this5._tabClicked(tabElement);
       };
 

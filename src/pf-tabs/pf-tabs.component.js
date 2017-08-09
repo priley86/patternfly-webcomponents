@@ -227,7 +227,7 @@ export class PfTabs extends HTMLElement {
     tabAnchor.innerHTML = pfTab.innerHTML;
 
     tabAnchor.onclick = (e) => {
-      event.preventDefault();
+      e.preventDefault();
       this._tabClicked(tabElement);
     };
 
