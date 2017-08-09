@@ -105,6 +105,13 @@ class PfUtil {
     }
     return parentHeight;
   }
+
+  getAttributeOrProperty(element, attribute) {
+    // checks element attributes and then properties
+    // React commonly gives us a node with attributes, when Angular adds it as a property
+    return element.attributes && element.attributes[attribute] ?
+      element.attributes[attribute].value : element[attribute];
+  }
 }
 
 let pfUtil = new PfUtil();
