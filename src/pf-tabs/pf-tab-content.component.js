@@ -1,3 +1,5 @@
+import { default as tmpl } from 'pf-tab-content.template';
+
 /**
  * <b>&lt;pf-tab&gt;</b> element for Patternfly Web Components
  *
@@ -17,21 +19,15 @@
  * @prop {string} contentId the content id which describes this tabs content
  * @prop {string} active whether this tab is currently active
  */
-export class PfTab extends HTMLElement {
+export class PfTabContent extends HTMLElement {
   /*
    * Called every time the element is inserted into the DOM
    */
   connectedCallback() {
-    this._class = this.getAttribute('class');
-    this._contentId = this.getAttribute('content-id');
-    this._active = this.getAttribute('active');
-  }
-
-  /*
-   * Only attributes listed in the observedAttributes property will receive this callback
-   */
-  static get observedAttributes() {
-    return ['active'];
+    this.firstElementChild.setAttribute('role', 'tabpanel');
+    this.firstElementChild.setAttribute('aria-labelledby', this.getAttribute('content-id'));
+    this.initialized = true;
+    this.dispatchEvent(new CustomEvent('pf-tab-content.initialized', {}));
   }
 
   /*
@@ -40,27 +36,6 @@ export class PfTab extends HTMLElement {
   constructor() {
     super();
   }
-
-  /**
-   * Get flag indicating tab is active
-   *
-   * @returns {boolean} True if tab is active
-   */
-  get active() {
-    return this._active;
-  }
-
-  /**
-   * Set flag indicating tab is active
-   *
-   * @param {boolean} value True to set tab active
-   */
-  set active(value) {
-    if (this._active !== value) {
-      this._active = value;
-      this.setAttribute('active', value);
-    }
-  }
 }
 
-window.customElements.define('pf-tab', PfTab);
+window.customElements.define('pf-tab-content', PfTabContent);
