@@ -1,36 +1,37 @@
-import {default as tmpl} from 'panel.template';
-
 /**
  * <b>&lt;pf-tab&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
  * <pf-tabs>
- *  <pf-tab tab-title="Tab1" active="true">
- *    <p>Tab1 content here</p>
+ *  <pf-tab class="nav-item" content-id="content1" active="true">
+ *    Tab One
  *  </pf-tab>
- *  <pf-tab tab-title="Tab2">
- *    <p>Tab2 content here</p>
+ *  <pf-tab class="nav-item" content-id="content2" active="true">
+ *    Tab Two
  *  </pf-tab>
  * </pf-tabs>
+ * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
+ * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
  *
- * @prop {string} tab-title the tab title
- * @prop {string} active if attribute exists, tab will be active
+ * @prop {string} class the tab ul class
+ * @prop {string} contentId the content id which describes this tabs content
+ * @prop {string} active whether this tab is currently active
  */
 export class PfTab extends HTMLElement {
   /*
    * Called every time the element is inserted into the DOM
    */
-  connectedCallback () {
-    this._tabTitle = this.getAttribute('tab-title');
-
-    this.appendChild(this._template.content);
+  connectedCallback() {
+    this._class = this.getAttribute('class');
+    this._contentId = this.getAttribute('content-id');
+    this._active = this.getAttribute('active');
   }
 
   /*
    * Only attributes listed in the observedAttributes property will receive this callback
    */
   static get observedAttributes() {
-    return ['tab-title'];
+    return ['active'];
   }
 
   /**
@@ -40,41 +41,19 @@ export class PfTab extends HTMLElement {
    * @param {string} oldValue The old attribute value
    * @param {string} newValue The new attribute value
    */
-  attributeChangedCallback (attrName, oldValue, newValue) {
+  attributeChangedCallback(attrName, oldValue, newValue) {
     let parent = this.parentNode;
-    if (attrName === 'tab-title' && parent && parent.handleTitle) {
-      parent.handleTitle(this, newValue);
-    }
+    // if (attrName === 'tab-title' && parent && parent.handleTitle) {
+    //   parent.handleTitle(this, newValue);
+    // }
+
   }
 
   /*
    * An instance of the element is created or upgraded
    */
-  constructor () {
+  constructor() {
     super();
-    this._template = document.createElement('template');
-    this._template.innerHTML = tmpl;
-  }
-
-  /**
-   * Get tab-title
-   *
-   * @returns {string} The tab-title
-   */
-  get tabTitle () {
-    return this._tabTitle;
-  }
-
-  /**
-   * Set tab tab-title
-   *
-   * @param {string} value The tab tab-title
-   */
-  set tabTitle (value) {
-    if (this._tabTitle !== value) {
-      this._tabTitle = value;
-      this.setAttribute('tab-title', value);
-    }
   }
 
   /**
@@ -82,7 +61,7 @@ export class PfTab extends HTMLElement {
    *
    * @returns {boolean} True if tab is active
    */
-  get active () {
+  get active() {
     return this._active;
   }
 
@@ -91,7 +70,7 @@ export class PfTab extends HTMLElement {
    *
    * @param {boolean} value True to set tab active
    */
-  set active (value) {
+  set active(value) {
     if (this._active !== value) {
       this._active = value;
       this.setAttribute('active', value);
