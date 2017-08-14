@@ -1,8 +1,8 @@
 describe ("PatternFly Tooltip Component Tests", function () {
-  var customElement, button;
+  let customElement, button;
 
   function render(html) {
-    var template = document.createElement('template');
+    let template = document.createElement('template');
     template.innerHTML = html;
     document.body.appendChild(document.importNode(template.content, true));
   }
@@ -14,7 +14,7 @@ describe ("PatternFly Tooltip Component Tests", function () {
 
   it('should create the tooltip on open and destroy on close', function (done) {
     render('<button id="btn">Button</button>');
-    render('<pf-tooltip id="tooltip" placement="left" targetSelector="#btn">Would you look at that!</pf-tooltip>');
+    render('<pf-tooltip id="tooltip" placement="left" target-selector="#btn">Would you look at that!</pf-tooltip>');
 
     button = document.querySelector('#btn');
     customElement = document.querySelector('#tooltip');
@@ -23,16 +23,16 @@ describe ("PatternFly Tooltip Component Tests", function () {
     //https://github.com/karma-runner/karma-phantomjs-launcher/issues/19
     customElement.open();
 
-    customElement.addEventListener('tooltipOpened', function () {
-      var tooltip = document.querySelector('.tooltip');
-      var tooltipText = tooltip.innerText.replace(/(\r\n|\n|\r)/gm,""); //remove any newlines rendered in Phantom
+    customElement.addEventListener('pf-tooltip.opened', function () {
+      let tooltip = document.querySelector('.tooltip');
+      let tooltipText = tooltip.innerText.replace(/(\r\n|\n|\r)/gm,""); //remove any newlines rendered in Phantom
 
       expect(tooltip.classList.contains('left')).toBe(true);
       expect(tooltipText).toBe("Would you look at that!");
       customElement.close();
     }, false);
 
-    customElement.addEventListener('tooltipClosed', function () {
+    customElement.addEventListener('pf-tooltip.closed', function () {
       expect(document.querySelector('.tooltip')).toBe(null);
       done();
     }, false);

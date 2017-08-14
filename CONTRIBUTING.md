@@ -73,11 +73,9 @@ Adhering to the following process is the best way to get your work included in t
   ```
 Ensure no lint errors are introduced in `npm-debug.log` after running this command.
 
-4. Add a commit using `npm run commit`:
+4. Add a commit:
 
 This project uses [`semantic-release`](https://npmjs.com/package/semantic-release) to do automatic releases and generate a changelog based on the commit history. So we follow [a convention][3] for commit messages. Please follow this convention for your commit messages.
-
-You can use `commitizen` to help you to follow [the convention][3].
 
 Once you are ready to commit the changes, please use the below commands:
 

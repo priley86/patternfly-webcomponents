@@ -1,5 +1,5 @@
 describe("Patternfly Dropdown Component Test", function () {
-  var customElement;
+  let customElement;
 
   beforeEach(function (done) {
     customElement = document.createElement('pf-dropdown');
@@ -9,7 +9,7 @@ describe("Patternfly Dropdown Component Test", function () {
       done();
     } else {
       //wait for initialization
-      customElement.addEventListener('initialized', function (event) {
+      customElement.addEventListener('pf-dropdown.initialized', function (event) {
         done();
       });
     }
@@ -20,24 +20,24 @@ describe("Patternfly Dropdown Component Test", function () {
   });
 
   it("should open if closed or close if open the dropdown on toggle()", function (done) {
-    var button = customElement.querySelector('#button');
+    let button = customElement.querySelector('#button');
     //open dropdown
     customElement.toggle();
-    customElement.addEventListener('shown.bs.dropdown', function () {
+    customElement.addEventListener('pf-dropdown.shown', function () {
       expect(button.parentNode.classList.contains('open')).toBe(true);
 
       //close dropdown
       customElement.toggle();
     }, false);
 
-    customElement.addEventListener('hidden.bs.dropdown', function () {
+    customElement.addEventListener('pf-dropdown.hidden', function () {
       expect(button.parentNode.classList.contains('open')).toBe(false);
     }, false);
     done();
   });
 
   it("disabled button should not open dropdown", function () {
-    var button = customElement.querySelector('.btn');
+    let button = customElement.querySelector('.btn');
     button.classList.add('disabled');
     customElement.toggle();
     expect(button.parentNode.classList.contains('open')).toBe(false);
@@ -46,12 +46,12 @@ describe("Patternfly Dropdown Component Test", function () {
   });
 
   it("should select an element", function () {
-    var buttonText = customElement.querySelector('.btn');
-    var item = customElement.querySelector('ul.dropdown-menu > li:nth-child(2) a');
-    var result = false;
+    let buttonText = customElement.querySelector('.btn');
+    let item = customElement.querySelector('ul.dropdown-menu > li:nth-child(2) a');
+    let result = false;
     expect(buttonText.innerText).toBe('Dropdown');
     expect(item.innerText).toBe('Item 1');
-    customElement.addEventListener('itemClicked', function () {
+    customElement.addEventListener('pf-dropdown.itemClicked', function () {
       result = true;
     });
     item.click();
@@ -59,10 +59,10 @@ describe("Patternfly Dropdown Component Test", function () {
   });
 
   it("should not click disabled item", function () {
-    var item = customElement.querySelector('ul.dropdown-menu  li.disabled a');
-    var result = false;
+    let item = customElement.querySelector('ul.dropdown-menu  li.disabled a');
+    let result = false;
     // custom event is not fired for disabled item
-    customElement.addEventListener('itemClicked', function () {
+    customElement.addEventListener('pf-dropdown.itemClicked', function () {
       result = true;
     });
     item.click();
