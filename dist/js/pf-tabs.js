@@ -562,33 +562,16 @@ var PfTab = exports.PfTab = function (_HTMLElement) {
      * Only attributes listed in the observedAttributes property will receive this callback
      */
 
-  }, {
-    key: 'attributeChangedCallback',
-
-
-    /**
-     * Called when element's attribute value has changed
-     *
-     * @param {string} attrName The attribute name that has changed
-     * @param {string} oldValue The old attribute value
-     * @param {string} newValue The new attribute value
-     */
-    value: function attributeChangedCallback(attrName, oldValue, newValue) {
-      var parent = this.parentNode;
-      // if (attrName === 'tab-title' && parent && parent.handleTitle) {
-      //   parent.handleTitle(this, newValue);
-      // }
+  }], [{
+    key: 'observedAttributes',
+    get: function get() {
+      return ['active'];
     }
 
     /*
      * An instance of the element is created or upgraded
      */
 
-  }], [{
-    key: 'observedAttributes',
-    get: function get() {
-      return ['active'];
-    }
   }]);
 
   function PfTab() {

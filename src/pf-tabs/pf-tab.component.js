@@ -34,21 +34,6 @@ export class PfTab extends HTMLElement {
     return ['active'];
   }
 
-  /**
-   * Called when element's attribute value has changed
-   *
-   * @param {string} attrName The attribute name that has changed
-   * @param {string} oldValue The old attribute value
-   * @param {string} newValue The new attribute value
-   */
-  attributeChangedCallback(attrName, oldValue, newValue) {
-    let parent = this.parentNode;
-    // if (attrName === 'tab-title' && parent && parent.handleTitle) {
-    //   parent.handleTitle(this, newValue);
-    // }
-
-  }
-
   /*
    * An instance of the element is created or upgraded
    */

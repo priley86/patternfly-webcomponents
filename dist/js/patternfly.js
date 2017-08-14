@@ -972,33 +972,16 @@ var PfTab = exports.PfTab = function (_HTMLElement) {
      * Only attributes listed in the observedAttributes property will receive this callback
      */
 
-  }, {
-    key: 'attributeChangedCallback',
-
-
-    /**
-     * Called when element's attribute value has changed
-     *
-     * @param {string} attrName The attribute name that has changed
-     * @param {string} oldValue The old attribute value
-     * @param {string} newValue The new attribute value
-     */
-    value: function attributeChangedCallback(attrName, oldValue, newValue) {
-      var parent = this.parentNode;
-      // if (attrName === 'tab-title' && parent && parent.handleTitle) {
-      //   parent.handleTitle(this, newValue);
-      // }
+  }], [{
+    key: 'observedAttributes',
+    get: function get() {
+      return ['active'];
     }
 
     /*
      * An instance of the element is created or upgraded
      */
 
-  }], [{
-    key: 'observedAttributes',
-    get: function get() {
-      return ['active'];
-    }
   }]);
 
   function PfTab() {
@@ -1224,7 +1207,7 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
       this.init();
 
       //handleContentChanged
-      this.element.addEventListener('handleContentChanged', function (e) {
+      this.element.addEventListener('pf-tooltip.handleContentChanged', function (e) {
         _this3.init();
       }, false);
     }
@@ -1280,7 +1263,7 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
     key: 'setInnerHtml',
     value: function setInnerHtml(html) {
       this._innerHtml = html;
-      this.element.dispatchEvent(new CustomEvent('handleContentChanged', {}));
+      this.element.dispatchEvent(new CustomEvent('pf-tooltip.handleContentChanged', {}));
     }
 
     /**
@@ -1306,7 +1289,7 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
           _this4._styleTooltip();
           _this4._showTooltip();
           //notify frameworks
-          _this4.dispatchEvent(new CustomEvent('tooltipOpened', {}));
+          _this4.dispatchEvent(new CustomEvent('pf-tooltip.opened', {}));
         }
       }, 20);
     }
@@ -1327,7 +1310,7 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
           setTimeout(function () {
             _this5._removeTooltip();
             //notify frameworks
-            _this5.dispatchEvent(new CustomEvent('tooltipClosed', {}));
+            _this5.dispatchEvent(new CustomEvent('pf-tooltip.closed', {}));
           }, _this5._duration);
         }
       }, this._delay + this._duration);
@@ -1741,8 +1724,8 @@ var PfUtilizationBarChart = exports.PfUtilizationBarChart = function (_HTMLEleme
         }
 
         if (thresholdClass !== this._lastThresholdClass) {
-          var event = new CustomEvent('thresholdSet', { 'id': this.getAttribute('id'), 'threshold': thresholdClass });
-          event.initCustomEvent('thresholdSet', true, true, { 'id': this.getAttribute('id'), 'threshold': thresholdClass });
+          var event = new CustomEvent('pf-utilization-bar-chart.thresholdSet', { 'id': this.getAttribute('id'), 'threshold': thresholdClass });
+          event.initCustomEvent('pf-utilization-bar-chart.thresholdSet', true, true, { 'id': this.getAttribute('id'), 'threshold': thresholdClass });
           usedBar.classList.remove(this._lastThresholdClass);
           usedBar.classList.add(thresholdClass);
           this._lastThresholdClass = thresholdClass;
@@ -2798,7 +2781,7 @@ var PfDropdown = exports.PfDropdown = function (_HTMLElement) {
       this.disableClick();
 
       this.initialized = true;
-      this.dispatchEvent(new CustomEvent('initialized', {}));
+      this.dispatchEvent(new CustomEvent('pf-dropdown.initialized', {}));
     }
 
     /**
@@ -2851,7 +2834,7 @@ var PfDropdown = exports.PfDropdown = function (_HTMLElement) {
           if (items[i].parentNode.classList.contains('disabled')) {
             return false;
           }
-          self.dispatchEvent(new CustomEvent('itemClicked', {}));
+          self.dispatchEvent(new CustomEvent('pf-dropdown.itemClicked', {}));
           return true;
         };
       };
@@ -2875,11 +2858,11 @@ var PfDropdown = exports.PfDropdown = function (_HTMLElement) {
       var active = /\bopen/.test(button.parentNode.className);
       if (!active) {
         this._detectTouch();
-        this.dispatchEvent(new CustomEvent('show.bs.dropdown', {}));
+        this.dispatchEvent(new CustomEvent('pf-dropdown.show', {}));
         button.focus();
         button.setAttribute('aria-expanded', 'true');
         button.parentNode.classList.toggle('open');
-        this.dispatchEvent(new CustomEvent('shown.bs.dropdown', {}));
+        this.dispatchEvent(new CustomEvent('pf-dropdown.shown', {}));
       }
       if (active) {
         this._clearDropdown();
@@ -2898,10 +2881,10 @@ var PfDropdown = exports.PfDropdown = function (_HTMLElement) {
       if (backdrop) {
         backdrop.parentNode.removeChild(backdrop);
       }
-      this.dispatchEvent(new CustomEvent('hide.bs.dropdown', {}));
+      this.dispatchEvent(new CustomEvent('pf-dropdown.hide', {}));
       button.setAttribute('aria-expanded', 'false');
       button.parentNode.classList.remove('open');
-      this.dispatchEvent(new CustomEvent('hidden.bs.dropdown', {}));
+      this.dispatchEvent(new CustomEvent('pf-dropdown.hidden', {}));
     }
 
     /**
@@ -3494,7 +3477,7 @@ var PfListView = exports.PfListView = function (_HTMLElement) {
     // ie. repeates the user defined template and replaces $(name) with actual values
     var _this = _possibleConstructorReturn(this, (PfListView.__proto__ || Object.getPrototypeOf(PfListView)).call(this));
 
-    _this.addEventListener("RepeaterContentChanged", function (e) {
+    _this.addEventListener("pf-template-repeater.ContentChanged", function (e) {
       this.handleRepeaterContentChanged();
     });
     return _this;
@@ -3634,8 +3617,8 @@ var PfListView = exports.PfListView = function (_HTMLElement) {
       var actionType = e.currentTarget.actionType;
       var itemId = e.currentTarget.itemId;
 
-      var event = new CustomEvent('ListViewItemActionInitiated', { "actionType": actionType, "itemId": itemId });
-      event.initCustomEvent('ListViewItemActionInitiated', true, true, { "actionType": actionType, "itemId": itemId });
+      var event = new CustomEvent('pf-list-view.ItemActionInitiated', { "actionType": actionType, "itemId": itemId });
+      event.initCustomEvent('pf-list-view.ItemActionInitiated', true, true, { "actionType": actionType, "itemId": itemId });
       this.dispatchEvent(event);
     }
   }, {
@@ -3664,8 +3647,8 @@ var PfListView = exports.PfListView = function (_HTMLElement) {
           var itemId = checkbox.parentNode.parentNode.lastElementChild.innerText.replace(/\s+/g, ' ').trim();
           checkbox.value = itemId;
           // there can only be one
-          checkbox.removeEventListener("change", handleCheckboxChange);
-          checkbox.addEventListener("change", handleCheckboxChange);
+          checkbox.removeEventListener("pf-list-view.change", handleCheckboxChange);
+          checkbox.addEventListener("pf-list-view.change", handleCheckboxChange);
         }
       }
 
@@ -3676,8 +3659,8 @@ var PfListView = exports.PfListView = function (_HTMLElement) {
         checkbox.parentNode.parentNode.parentNode.classList.toggle('active');
 
         var msg = (checkbox.checked ? "Selected: " : "Unselected: ") + checkbox.value;
-        var event = new CustomEvent('RowSelectionChanged', { "value": msg });
-        event.initCustomEvent('RowSelectionChanged', true, true, { "value": msg });
+        var event = new CustomEvent('pf-list-view.RowSelectionChanged', { "value": msg });
+        event.initCustomEvent('pf-list-view.RowSelectionChanged', true, true, { "value": msg });
         this.dispatchEvent(event);
       }
     }
@@ -3781,8 +3764,8 @@ var PFTemplateRepeater = function (_HTMLElement) {
       }
 
       // dispatch a 'repeater content changed' event
-      var event = new CustomEvent('RepeaterContentChanged', {});
-      event.initCustomEvent('RepeaterContentChanged', true, true, {});
+      var event = new CustomEvent('pf-template-repeater.ContentChanged', {});
+      event.initCustomEvent('pf-template-repeater.ContentChanged', true, true, {});
       this.dispatchEvent(event);
 
       return this.innerHTML;
