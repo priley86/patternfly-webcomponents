@@ -217,7 +217,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
 
     /**
      * Sets the active tab programmatically
-     * @param tabTitle
+     * @param {number} tabIndex the tab index
      */
 
   }, {
@@ -366,8 +366,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
     /**
      * Helper function to set tab status
      *
-     * @param {boolean} active True if active
-     * @param {string} tabtitle the tab title
+     * @param tabElement a pfTab li element
      * @private
      */
 
