@@ -60,23 +60,37 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 34);
+/******/ 	return __webpack_require__(__webpack_require__.s = 40);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 34:
+/***/ 10:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var PfTabContentTemplate = "\n<div role=\"tabpanel\"></div>\n";
+exports.default = PfTabContentTemplate;
+
+/***/ }),
+
+/***/ 40:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /** PF Tabs Component **/
-__webpack_require__(4);
+__webpack_require__(5);
 
 /***/ }),
 
-/***/ 4:
+/***/ 5:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -89,19 +103,19 @@ exports.PfTabs = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfTab = __webpack_require__(5);
+var _pfTab = __webpack_require__(6);
 
 var _pfTab2 = _interopRequireDefault(_pfTab);
 
-var _pfTabs = __webpack_require__(6);
+var _pfTabs = __webpack_require__(7);
 
 var _pfTabs2 = _interopRequireDefault(_pfTabs);
 
-var _pfTab3 = __webpack_require__(7);
+var _pfTab3 = __webpack_require__(8);
 
 var _pfTab4 = _interopRequireDefault(_pfTab3);
 
-__webpack_require__(8);
+__webpack_require__(9);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -477,7 +491,7 @@ window.customElements.define('pf-tabs', PfTabs);
 
 /***/ }),
 
-/***/ 5:
+/***/ 6:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -491,7 +505,7 @@ exports.default = PfTabTemplate;
 
 /***/ }),
 
-/***/ 6:
+/***/ 7:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -505,7 +519,7 @@ exports.default = PfTabsTemplate;
 
 /***/ }),
 
-/***/ 7:
+/***/ 8:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -613,7 +627,7 @@ window.customElements.define('pf-tab', PfTab);
 
 /***/ }),
 
-/***/ 8:
+/***/ 9:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -626,7 +640,7 @@ exports.PfTabContent = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfTabContent = __webpack_require__(9);
+var _pfTabContent = __webpack_require__(10);
 
 var _pfTabContent2 = _interopRequireDefault(_pfTabContent);
 
@@ -689,20 +703,6 @@ var PfTabContent = exports.PfTabContent = function (_HTMLElement) {
 }(HTMLElement);
 
 window.customElements.define('pf-tab-content', PfTabContent);
-
-/***/ }),
-
-/***/ 9:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var PfTabContentTemplate = "\n<div role=\"tabpanel\"></div>\n";
-exports.default = PfTabContentTemplate;
 
 /***/ })
 

@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 35);
+/******/ 	return __webpack_require__(__webpack_require__.s = 41);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -180,6 +180,31 @@ var PfUtil = function () {
 
       el.addEventListener(type, one);
     }
+
+    // the following 2 methods were taken from bootstrap.native - Native Javascript for Bootstrap 4
+    // https://github.com/thednp/bootstrap.native
+    // Copyright (c) 2015 dnp_theme
+
+  }, {
+    key: 'getOuterHeight',
+    value: function getOuterHeight(child) {
+      var childStyle = child && window.getComputedStyle(child),
+          btp = /px/.test(childStyle.borderTopWidth) ? Math.round(childStyle.borderTopWidth.replace('px', '')) : 0,
+          btb = /px/.test(childStyle.borderBottomWidth) ? Math.round(childStyle.borderBottomWidth.replace('px', '')) : 0,
+          mtp = /px/.test(childStyle.marginTop) ? Math.round(childStyle.marginTop.replace('px', '')) : 0,
+          mbp = /px/.test(childStyle.marginBottom) ? Math.round(childStyle.marginBottom.replace('px', '')) : 0;
+      return child.clientHeight + parseInt(btp) + parseInt(btb) + parseInt(mtp) + parseInt(mbp);
+    }
+  }, {
+    key: 'getMaxHeight',
+    value: function getMaxHeight(parent) {
+      // get collapse trueHeight and border
+      var parentHeight = 0;
+      for (var k = 0, ll = parent.children.length; k < ll; k++) {
+        parentHeight += parent.children[k].offsetHeight;
+      }
+      return parentHeight;
+    }
   }]);
 
   return PfUtil;
@@ -190,7 +215,7 @@ exports.pfUtil = pfUtil;
 
 /***/ }),
 
-/***/ 10:
+/***/ 11:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -203,7 +228,7 @@ exports.PfTooltip = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfTooltip = __webpack_require__(11);
+var _pfTooltip = __webpack_require__(12);
 
 var _pfTooltip2 = _interopRequireDefault(_pfTooltip);
 
@@ -363,6 +388,7 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
         if (_this4.tooltip === null) {
           _this4._createTooltip();
           _this4._styleTooltip();
+          _this4._checkPlacement();
           _this4._showTooltip();
           //notify frameworks
           _this4.dispatchEvent(new CustomEvent('pf-tooltip.opened', {}));
@@ -387,6 +413,8 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
             _this5._removeTooltip();
             //notify frameworks
             _this5.dispatchEvent(new CustomEvent('pf-tooltip.closed', {}));
+            // reset position after tooltip is closed
+            _this5._placement = _this5.getAttribute('placement') ? _this5.getAttribute('placement') : 'right';
           }, _this5._duration);
         }
       }, this._delay + this._duration);
@@ -428,6 +456,27 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
     }
 
     /**
+     * update the placement of tooltip
+     */
+
+  }, {
+    key: '_updatePlacement',
+    value: function _updatePlacement() {
+      switch (this._placement) {
+        case 'top':
+          return 'bottom';
+        case 'bottom':
+          return 'top';
+        case 'left':
+          return 'right';
+        case 'right':
+          return 'left';
+        default:
+          return this._placement;
+      }
+    }
+
+    /**
      * Styles the tooltip based on placement attribute
      * @private
      */
@@ -462,6 +511,21 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
         //RIGHT
         this.tooltip.style.top = rect.top + scroll.y - tooltipDimensions.h / 2 + linkDimensions.h / 2 + 'px';
         this.tooltip.style.left = rect.left + scroll.x + linkDimensions.w + 'px';
+      }
+
+      this.tooltip.className.indexOf(this._placement) === -1 && (this.tooltip.className = this.tooltip.className.replace(/\b(top|bottom|left|right)+/, this._placement));
+    }
+
+    /**
+     * check the placement of tooltip
+     */
+
+  }, {
+    key: '_checkPlacement',
+    value: function _checkPlacement() {
+      if (!_pfUtils.pfUtil.isElementInViewport(this.tooltip)) {
+        this._placement = this._updatePlacement();
+        this._styleTooltip();
       }
     }
 
@@ -629,7 +693,7 @@ window.customElements.define('pf-tooltip', PfTooltip);
 
 /***/ }),
 
-/***/ 11:
+/***/ 12:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -644,14 +708,14 @@ exports.default = PfTooltipTemplate;
 
 /***/ }),
 
-/***/ 35:
+/***/ 41:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /** PF Tooltip Component **/
-__webpack_require__(10);
+__webpack_require__(11);
 
 /***/ })
 
