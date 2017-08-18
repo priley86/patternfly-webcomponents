@@ -8,6 +8,14 @@ pf-tab-content > *:not(ul):not(pf-tab):not(pf-tabs):not(pf-tab-content) {
   padding: 15px;
 }
 
+pf-tab-content {
+  display: none;
+}
+
+pf-tab-content.active {
+  display: block;
+}
+
 pf-tab {
   display: none;
 }

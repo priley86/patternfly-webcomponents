@@ -1051,12 +1051,6 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
         active: active
       };
 
-      //hide tab contents initially
-      var tabContents = document.querySelectorAll('pf-tab-content[content-id="' + tab.tabContentId + '"]');
-      [].forEach.call(tabContents, function (tabContent) {
-        tabContent.style.display = 'none';
-      });
-
       this.tabs.push(tab);
       return tab;
     }
@@ -1081,7 +1075,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
       //display tab contents
       var tabContents = document.querySelectorAll('pf-tab-content[content-id="' + tab.tabContentId + '"]');
       [].forEach.call(tabContents, function (tabContent) {
-        tabContent.style.display = '';
+        _pfUtils.pfUtil.addClass(tabContent, 'active');
       });
     }
 
@@ -1103,7 +1097,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
       //hide tab contents
       var tabContents = document.querySelectorAll('pf-tab-content[content-id="' + tab.tabContentId + '"]');
       [].forEach.call(tabContents, function (tabContent) {
-        tabContent.style.display = 'none';
+        _pfUtils.pfUtil.removeClass(tabContent, 'active');
       });
     }
 
