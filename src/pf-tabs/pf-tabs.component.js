@@ -283,13 +283,6 @@ export class PfTabs extends HTMLElement {
       active: active
     };
 
-    //hide tab contents initially
-    let tabContents =
-        document.querySelectorAll('pf-tab-content[content-id="' + tab.tabContentId + '"]');
-    [].forEach.call(tabContents, (tabContent) => {
-      tabContent.style.display = 'none';
-    });
-
     this.tabs.push(tab);
     return tab;
   }
@@ -312,7 +305,7 @@ export class PfTabs extends HTMLElement {
     let tabContents =
       document.querySelectorAll('pf-tab-content[content-id="' + tab.tabContentId + '"]');
     [].forEach.call(tabContents, (tabContent) => {
-      tabContent.style.display = '';
+      pfUtil.addClass(tabContent, 'active');
     });
   }
 
@@ -332,7 +325,7 @@ export class PfTabs extends HTMLElement {
     let tabContents =
         document.querySelectorAll('pf-tab-content[content-id="' + tab.tabContentId + '"]');
     [].forEach.call(tabContents, (tabContent) => {
-      tabContent.style.display = 'none';
+      pfUtil.removeClass(tabContent, 'active');
     });
   }
 
