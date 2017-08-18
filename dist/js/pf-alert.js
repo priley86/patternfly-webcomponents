@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 39);
+/******/ 	return __webpack_require__(__webpack_require__.s = 40);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -204,6 +204,13 @@ var PfUtil = function () {
         parentHeight += parent.children[k].offsetHeight;
       }
       return parentHeight;
+    }
+  }, {
+    key: 'getAttributeOrProperty',
+    value: function getAttributeOrProperty(element, attribute) {
+      // checks element attributes and then properties
+      // React commonly gives us a node with attributes, when Angular adds it as a property
+      return element.attributes && element.attributes[attribute] ? element.attributes[attribute].value : element[attribute];
     }
   }]);
 
@@ -451,17 +458,6 @@ window.customElements.define('pf-alert', PfAlert);
 
 /***/ }),
 
-/***/ 39:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/** PF Alert Component **/
-__webpack_require__(3);
-
-/***/ }),
-
 /***/ 4:
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -473,6 +469,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 var PfAlertTemplate = "\n<button type=\"button\" class=\"close hidden\" data-dismiss=\"alert\" aria-hidden=\"true\">\n  <span class=\"pficon pficon-close\"></span>\n</button>\n<span class=\"pficon\"></span>\n";
 exports.default = PfAlertTemplate;
+
+/***/ }),
+
+/***/ 40:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/** PF Alert Component **/
+__webpack_require__(3);
 
 /***/ })
 

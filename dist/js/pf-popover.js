@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 53);
+/******/ 	return __webpack_require__(__webpack_require__.s = 54);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -205,6 +205,13 @@ var PfUtil = function () {
       }
       return parentHeight;
     }
+  }, {
+    key: 'getAttributeOrProperty',
+    value: function getAttributeOrProperty(element, attribute) {
+      // checks element attributes and then properties
+      // React commonly gives us a node with attributes, when Angular adds it as a property
+      return element.attributes && element.attributes[attribute] ? element.attributes[attribute].value : element[attribute];
+    }
   }]);
 
   return PfUtil;
@@ -215,7 +222,7 @@ exports.pfUtil = pfUtil;
 
 /***/ }),
 
-/***/ 36:
+/***/ 37:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -228,7 +235,7 @@ exports.PfPopover = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfPopover = __webpack_require__(37);
+var _pfPopover = __webpack_require__(38);
 
 var _pfPopover2 = _interopRequireDefault(_pfPopover);
 
@@ -763,7 +770,7 @@ window.customElements.define('pf-popover', PfPopover);
 
 /***/ }),
 
-/***/ 37:
+/***/ 38:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -778,14 +785,14 @@ exports.default = PfPopoverTemplate;
 
 /***/ }),
 
-/***/ 53:
+/***/ 54:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /** PF Popover Component **/
-__webpack_require__(36);
+__webpack_require__(37);
 
 /***/ })
 

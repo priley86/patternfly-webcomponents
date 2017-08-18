@@ -60,12 +60,251 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 40);
+/******/ 	return __webpack_require__(__webpack_require__.s = 41);
 /******/ })
 /************************************************************************/
 /******/ ({
 
+/***/ 0:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * --------------------------------------------------------------------------
+ * PfUtil
+ * Internal Utility Functions for Patternfly Web Components
+ * --------------------------------------------------------------------------
+ */
+
+var PfUtil = function () {
+  function PfUtil() {
+    _classCallCheck(this, PfUtil);
+
+    this.isMSIE = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})").exec(navigator.userAgent) !== null ? parseFloat(RegExp.$1) : false;
+    this.isIE = /(MSIE|Trident\/|Edge\/)/i.test(window.navigator.userAgent);
+  }
+
+  _createClass(PfUtil, [{
+    key: 'addClass',
+    value: function addClass(el, c) {
+      // where modern browsers fail, use classList
+      if (el.classList) {
+        el.classList.add(c);
+      } else {
+        el.className += ' ' + c;
+        el.offsetWidth;
+      }
+    }
+  }, {
+    key: 'removeClass',
+    value: function removeClass(el, c) {
+      if (el.classList) {
+        el.classList.remove(c);
+      } else {
+        el.className = el.className.replace(c, '').replace(/^\s+|\s+$/g, '');
+      }
+    }
+  }, {
+    key: 'getClosest',
+    value: function getClosest(el, s) {
+      //el is the element and s the selector of the closest item to find
+      // source http://gomakethings.com/climbing-up-and-down-the-dom-tree-with-vanilla-javascript/
+      var former = s.charAt(0);
+      var latter = s.substr(1);
+      for (; el && el !== document; el = el.parentNode) {
+        // Get closest match
+        if (former === '#') {
+          // If selector is an ID
+          if (el.id === latter) {
+            return el;
+          }
+        } else if (former === '.') {
+          // If selector is a class
+          if (new RegExp(latter).test(el.className)) {
+            return el;
+          }
+        } else {
+          // we assume other selector is tag name
+          if (el.nodeName === s) {
+            return el;
+          }
+        }
+      }
+      return false;
+    }
+
+    // tooltip / popover stuff
+
+  }, {
+    key: 'isElementInViewport',
+    value: function isElementInViewport(t) {
+      // check if this.tooltip is in viewport
+      var r = t.getBoundingClientRect();
+      return r.top >= 0 && r.left >= 0 && r.bottom <= (window.innerHeight || document.documentElement.clientHeight) && r.right <= (window.innerWidth || document.documentElement.clientWidth);
+    }
+  }, {
+    key: 'getScroll',
+    value: function getScroll() {
+      // also Affix and scrollSpy uses it
+      return {
+        y: window.pageYOffset || document.documentElement.scrollTop,
+        x: window.pageXOffset || document.documentElement.scrollLeft
+      };
+    }
+  }, {
+    key: 'reflow',
+    value: function reflow(el) {
+      // force reflow
+      return el.offsetHeight;
+    }
+  }, {
+    key: 'once',
+    value: function once(el, type, listener, self) {
+      var one = function one(e) {
+        try {
+          listener.call(self, e);
+        } finally {
+          el.removeEventListener(type, one);
+        }
+      };
+
+      el.addEventListener(type, one);
+    }
+
+    // the following 2 methods were taken from bootstrap.native - Native Javascript for Bootstrap 4
+    // https://github.com/thednp/bootstrap.native
+    // Copyright (c) 2015 dnp_theme
+
+  }, {
+    key: 'getOuterHeight',
+    value: function getOuterHeight(child) {
+      var childStyle = child && window.getComputedStyle(child),
+          btp = /px/.test(childStyle.borderTopWidth) ? Math.round(childStyle.borderTopWidth.replace('px', '')) : 0,
+          btb = /px/.test(childStyle.borderBottomWidth) ? Math.round(childStyle.borderBottomWidth.replace('px', '')) : 0,
+          mtp = /px/.test(childStyle.marginTop) ? Math.round(childStyle.marginTop.replace('px', '')) : 0,
+          mbp = /px/.test(childStyle.marginBottom) ? Math.round(childStyle.marginBottom.replace('px', '')) : 0;
+      return child.clientHeight + parseInt(btp) + parseInt(btb) + parseInt(mtp) + parseInt(mbp);
+    }
+  }, {
+    key: 'getMaxHeight',
+    value: function getMaxHeight(parent) {
+      // get collapse trueHeight and border
+      var parentHeight = 0;
+      for (var k = 0, ll = parent.children.length; k < ll; k++) {
+        parentHeight += parent.children[k].offsetHeight;
+      }
+      return parentHeight;
+    }
+  }, {
+    key: 'getAttributeOrProperty',
+    value: function getAttributeOrProperty(element, attribute) {
+      // checks element attributes and then properties
+      // React commonly gives us a node with attributes, when Angular adds it as a property
+      return element.attributes && element.attributes[attribute] ? element.attributes[attribute].value : element[attribute];
+    }
+  }]);
+
+  return PfUtil;
+}();
+
+var pfUtil = new PfUtil();
+exports.pfUtil = pfUtil;
+
+/***/ }),
+
 /***/ 10:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PfTabContent = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _pfTabContent = __webpack_require__(11);
+
+var _pfTabContent2 = _interopRequireDefault(_pfTabContent);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/**
+ * <b>&lt;pf-tab-content&gt;</b> element for Patternfly Web Components
+ *
+ * @example {@lang xml}
+ * <pf-tabs tabs-class="nav nav-tabs">
+ *  <pf-tab tab-class="nav-item" content-id="content1" active="true">
+ *    Tab One
+ *  </pf-tab>
+ *  <pf-tab tab-class="nav-item" content-id="content2" active="true">
+ *    Tab Two
+ *  </pf-tab>
+ *  <pf-tab-row-contents contents-class="pf-tabrow-contents">
+ *    <button class="btn btn-default" type="button">Default</button>
+ *  </pf-tab-row-contents>
+ * </pf-tabs>
+ * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
+ * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
+ *
+ * @prop {string} class the tab ul class
+ * @prop {string} contentId the content id which describes this tabs content
+ * @prop {string} active whether this tab is currently active
+ */
+var PfTabContent = exports.PfTabContent = function (_HTMLElement) {
+  _inherits(PfTabContent, _HTMLElement);
+
+  _createClass(PfTabContent, [{
+    key: 'connectedCallback',
+
+    /*
+     * Called every time the element is inserted into the DOM
+     */
+    value: function connectedCallback() {
+      this.firstElementChild.setAttribute('role', 'tabpanel');
+      this.firstElementChild.setAttribute('aria-labelledby', this.getAttribute('content-id'));
+      this.initialized = true;
+      this.dispatchEvent(new CustomEvent('pf-tab-content.initialized', {}));
+    }
+
+    /*
+     * An instance of the element is created or upgraded
+     */
+
+  }]);
+
+  function PfTabContent() {
+    _classCallCheck(this, PfTabContent);
+
+    return _possibleConstructorReturn(this, (PfTabContent.__proto__ || Object.getPrototypeOf(PfTabContent)).call(this));
+  }
+
+  return PfTabContent;
+}(HTMLElement);
+
+window.customElements.define('pf-tab-content', PfTabContent);
+
+/***/ }),
+
+/***/ 11:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -79,7 +318,7 @@ exports.default = PfTabContentTemplate;
 
 /***/ }),
 
-/***/ 40:
+/***/ 41:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -111,11 +350,17 @@ var _pfTabs = __webpack_require__(7);
 
 var _pfTabs2 = _interopRequireDefault(_pfTabs);
 
-var _pfTab3 = __webpack_require__(8);
+var _pfTabRowContents = __webpack_require__(8);
+
+var _pfTabRowContents2 = _interopRequireDefault(_pfTabRowContents);
+
+var _pfUtils = __webpack_require__(0);
+
+var _pfTab3 = __webpack_require__(9);
 
 var _pfTab4 = _interopRequireDefault(_pfTab3);
 
-__webpack_require__(9);
+__webpack_require__(10);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -129,13 +374,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * <b>&lt;pf-tabs&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
- * <pf-tabs class="nav nav-tabs">
- *  <pf-tab class="nav-item" content-id="content1" active="true">
+ * <pf-tabs tabs-class="nav nav-tabs">
+ *  <pf-tab tab-class="nav-item" content-id="content1" active="true">
  *    Tab One
  *  </pf-tab>
- *  <pf-tab class="nav-item" content-id="content2" active="true">
+ *  <pf-tab tab-class="nav-item" content-id="content2" active="true">
  *    Tab Two
  *  </pf-tab>
+ *  <pf-tab-row-contents contents-class="pf-tabrow-contents">
+ *    <button class="btn btn-default" type="button">Default</button>
+ *  </pf-tab-row-contents>
  * </pf-tabs>
  * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
  * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
@@ -156,10 +404,10 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
 
         this._makeTabsFromPfTab();
 
-        this.querySelector('ul').addEventListener('click', this);
+        this._makeTabRowContents();
 
         // Add the ul class if specified
-        this.querySelector('ul').className = this.attributes.class ? this.attributes.class.value : 'nav nav-tabs';
+        this.querySelector('ul').className = this.attributes['tabs-class'] ? this.attributes['tabs-class'].value : 'nav nav-tabs';
 
         if (!this.mutationObserver) {
           this.mutationObserver = new MutationObserver(this._handleMutations.bind(this));
@@ -187,7 +435,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
      * @param {string} newValue The new attribute value
      */
     value: function attributeChangedCallback(attrName, oldValue, newValue) {
-      if (attrName === 'class' && newValue !== 'ng-isolate-scope') {
+      if (attrName === 'tabs-class' && newValue !== 'ng-isolate-scope') {
         var ul = this.firstElementChild;
         if (ul) {
           ul.className = newValue;
@@ -202,7 +450,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
   }], [{
     key: 'observedAttributes',
     get: function get() {
-      return ['class'];
+      return ['tabs-class'];
     }
   }]);
 
@@ -216,28 +464,19 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
 
     _this.selectedIndex = null;
     _this.tabs = [];
+    _this.tabRowListItem = null;
     return _this;
   }
 
   /**
-   * Called when the element is removed from the DOM
+   * Handle mutations
+   *
+   * @param mutations
+   * @private
    */
 
 
   _createClass(PfTabs, [{
-    key: 'disconnectedCallback',
-    value: function disconnectedCallback() {
-      this.querySelector('ul').removeEventListener('click', this);
-    }
-
-    /**
-     * Handle mutations
-     *
-     * @param mutations
-     * @private
-     */
-
-  }, {
     key: '_handleMutations',
     value: function _handleMutations(mutations) {
       var _this2 = this;
@@ -266,7 +505,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
             var node = notes[1];
             var tab = void 0;
 
-            // a pf-tab node has been added or removed
+            // if a pf-tab node has been added or removed
             if (node.nodeName === 'PF-TAB') {
               if (action === 'add') {
                 //add tab
@@ -295,15 +534,22 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
                   _this2._makeActive(_this2.tabs[0]);
                 }
               }
+              return;
             }
 
-            //the pf-tab contents have changed, update the tab
-            if (action === 'add' && node.parentNode.nodeName === 'PF-TAB') {
-              var _tabIndex = node.parentNode.getAttribute('tab-index');
-              if (_tabIndex) {
-                var index = parseInt(_tabIndex);
-                var tabAnchor = _this2.tabs[index].tabElement.firstElementChild;
-                tabAnchor.innerHTML = node.parentNode.innerHTML;
+            //if the pf-tab-row-contents have changed, update the contents
+            if (action === 'add' && _this2.tabRowContents && _this2.tabRowContents.contains(node)) {
+              _this2.tabRowListItem.innerHTML = _this2.tabRowContents.innerHTML;
+              return;
+            }
+
+            //if the pf-tab contents have changed, update the tab
+            if (action === 'add') {
+              for (var i = 0; i < _this2.tabs.length; i++) {
+                if (_this2.tabs[i].pfTab.contains(node)) {
+                  var tabAnchor = _this2.tabs[i].tabElement.firstElementChild;
+                  tabAnchor.innerHTML = node.parentNode.innerHTML;
+                }
               }
             }
           });
@@ -364,6 +610,35 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
     }
 
     /**
+     * Helper function to create tab row contents
+     *
+     * @private
+     */
+
+  }, {
+    key: '_makeTabRowContents',
+    value: function _makeTabRowContents() {
+      this.tabRowContents = this.querySelector('pf-tab-row-contents');
+
+      if (this.tabRowContents) {
+        var frag = document.createElement('template');
+        frag.innerHTML = _pfTabRowContents2.default;
+
+        // move contents to the tab-row-contents template
+        var li = frag.content.firstElementChild;
+        li.innerHTML = this.tabRowContents.innerHTML;
+
+        // set the tab row class
+        var tabRowClass = _pfUtils.pfUtil.getAttributeOrProperty(this.tabRowContents, 'contents-class');
+        li.className = tabRowClass || 'pf-tabrow-contents';
+        var ul = this.querySelector('ul');
+        ul.appendChild(li);
+
+        this.tabRowListItem = li;
+      }
+    }
+
+    /**
      * Helper function to create a new tab element from given tab
      *
      * @param pfTab A PfTab element
@@ -390,9 +665,14 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
         _this5._tabClicked(tabElement);
       };
 
-      //React gives us a node with attributes, Angular adds it as a property
-      var tabContentId = pfTab.attributes && pfTab.attributes['content-id'] ? pfTab.attributes['content-id'].value : pfTab['content-id'];
+      var tabContentId = _pfUtils.pfUtil.getAttributeOrProperty(pfTab, 'content-id');
       tabAnchor.setAttribute('aria-controls', tabContentId);
+
+      var tabClass = _pfUtils.pfUtil.getAttributeOrProperty(pfTab, 'tab-class');
+      if (tabClass) {
+        tabElement.className = tabClass;
+      }
+
       var active = pfTab.attributes && pfTab.attributes.active || pfTab.active;
       var tab = {
         tabIndex: tabIndex,
@@ -528,6 +808,20 @@ exports.default = PfTabsTemplate;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+var PfTabRowContentsTemplate = "\n<li role=\"section\">\n</li>\n";
+exports.default = PfTabRowContentsTemplate;
+
+/***/ }),
+
+/***/ 9:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -541,18 +835,21 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * <b>&lt;pf-tab&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
- * <pf-tabs>
- *  <pf-tab class="nav-item" content-id="content1" active="true">
+ * <pf-tabs tabs-class="nav nav-tabs">
+ *  <pf-tab tab-class="nav-item" content-id="content1" active="true">
  *    Tab One
  *  </pf-tab>
- *  <pf-tab class="nav-item" content-id="content2" active="true">
+ *  <pf-tab tab-class="nav-item" content-id="content2" active="true">
  *    Tab Two
  *  </pf-tab>
+ *  <pf-tab-row-contents contents-class="pf-tabrow-contents">
+ *    <button class="btn btn-default" type="button">Default</button>
+ *  </pf-tab-row-contents>
  * </pf-tabs>
  * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
  * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
  *
- * @prop {string} class the tab ul class
+ * @prop {string} tabClass the tab li class
  * @prop {string} contentId the content id which describes this tabs content
  * @prop {string} active whether this tab is currently active
  */
@@ -566,7 +863,7 @@ var PfTab = exports.PfTab = function (_HTMLElement) {
      * Called every time the element is inserted into the DOM
      */
     value: function connectedCallback() {
-      this._class = this.getAttribute('class');
+      this._tabClass = this.getAttribute('tab-class');
       this._contentId = this.getAttribute('content-id');
       this._active = this.getAttribute('active');
     }
@@ -624,85 +921,6 @@ var PfTab = exports.PfTab = function (_HTMLElement) {
 }(HTMLElement);
 
 window.customElements.define('pf-tab', PfTab);
-
-/***/ }),
-
-/***/ 9:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PfTabContent = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _pfTabContent = __webpack_require__(10);
-
-var _pfTabContent2 = _interopRequireDefault(_pfTabContent);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-/**
- * <b>&lt;pf-tab&gt;</b> element for Patternfly Web Components
- *
- * @example {@lang xml}
- * <pf-tabs>
- *  <pf-tab class="nav-item" content-id="content1" active="true">
- *    Tab One
- *  </pf-tab>
- *  <pf-tab class="nav-item" content-id="content2" active="true">
- *    Tab Two
- *  </pf-tab>
- * </pf-tabs>
- * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
- * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
- *
- * @prop {string} class the tab ul class
- * @prop {string} contentId the content id which describes this tabs content
- * @prop {string} active whether this tab is currently active
- */
-var PfTabContent = exports.PfTabContent = function (_HTMLElement) {
-  _inherits(PfTabContent, _HTMLElement);
-
-  _createClass(PfTabContent, [{
-    key: 'connectedCallback',
-
-    /*
-     * Called every time the element is inserted into the DOM
-     */
-    value: function connectedCallback() {
-      this.firstElementChild.setAttribute('role', 'tabpanel');
-      this.firstElementChild.setAttribute('aria-labelledby', this.getAttribute('content-id'));
-      this.initialized = true;
-      this.dispatchEvent(new CustomEvent('pf-tab-content.initialized', {}));
-    }
-
-    /*
-     * An instance of the element is created or upgraded
-     */
-
-  }]);
-
-  function PfTabContent() {
-    _classCallCheck(this, PfTabContent);
-
-    return _possibleConstructorReturn(this, (PfTabContent.__proto__ || Object.getPrototypeOf(PfTabContent)).call(this));
-  }
-
-  return PfTabContent;
-}(HTMLElement);
-
-window.customElements.define('pf-tab-content', PfTabContent);
 
 /***/ })
 

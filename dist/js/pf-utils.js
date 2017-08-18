@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 54);
+/******/ 	return __webpack_require__(__webpack_require__.s = 55);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -205,6 +205,13 @@ var PfUtil = function () {
       }
       return parentHeight;
     }
+  }, {
+    key: 'getAttributeOrProperty',
+    value: function getAttributeOrProperty(element, attribute) {
+      // checks element attributes and then properties
+      // React commonly gives us a node with attributes, when Angular adds it as a property
+      return element.attributes && element.attributes[attribute] ? element.attributes[attribute].value : element[attribute];
+    }
   }]);
 
   return PfUtil;
@@ -269,7 +276,7 @@ exports.i18n = i18n;
 
 /***/ }),
 
-/***/ 54:
+/***/ 55:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

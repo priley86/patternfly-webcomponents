@@ -13,7 +13,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
- * <b>&lt;pf-tab&gt;</b> element for Patternfly Web Components
+ * <b>&lt;pf-tab-row-contents&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
  * <pf-tabs tabs-class="nav nav-tabs">
@@ -30,75 +30,87 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
  * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
  *
- * @prop {string} tabClass the tab li class
- * @prop {string} contentId the content id which describes this tabs content
- * @prop {string} active whether this tab is currently active
+ * @prop {string} contentsClass the tab row contents class
  */
-var PfTab = exports.PfTab = function (_HTMLElement) {
-  _inherits(PfTab, _HTMLElement);
+var PfTabRowContents = exports.PfTabRowContents = function (_HTMLElement) {
+  _inherits(PfTabRowContents, _HTMLElement);
 
-  _createClass(PfTab, [{
+  /*
+   * An instance of the element is created or upgraded
+   */
+  function PfTabRowContents() {
+    _classCallCheck(this, PfTabRowContents);
+
+    return _possibleConstructorReturn(this, (PfTabRowContents.__proto__ || Object.getPrototypeOf(PfTabRowContents)).call(this));
+  }
+
+  /*
+   * Called every time the element is inserted into the DOM
+   */
+
+
+  _createClass(PfTabRowContents, [{
     key: 'connectedCallback',
-
-    /*
-     * Called every time the element is inserted into the DOM
-     */
     value: function connectedCallback() {
-      this._tabClass = this.getAttribute('tab-class');
-      this._contentId = this.getAttribute('content-id');
-      this._active = this.getAttribute('active');
+      this._contentsClass = this.getAttribute('contents-class');
     }
 
     /*
      * Only attributes listed in the observedAttributes property will receive this callback
      */
 
-  }], [{
-    key: 'observedAttributes',
-    get: function get() {
-      return ['active'];
-    }
+  }, {
+    key: 'attributeChangedCallback',
 
-    /*
-     * An instance of the element is created or upgraded
+
+    /**
+     * Called when element's attribute value has changed
+     *
+     * @param {string} attrName The attribute name that has changed
+     * @param {string} oldValue The old attribute value
+     * @param {string} newValue The new attribute value
      */
-
-  }]);
-
-  function PfTab() {
-    _classCallCheck(this, PfTab);
-
-    return _possibleConstructorReturn(this, (PfTab.__proto__ || Object.getPrototypeOf(PfTab)).call(this));
-  }
-
-  /**
-   * Get flag indicating tab is active
-   *
-   * @returns {boolean} True if tab is active
-   */
-
-
-  _createClass(PfTab, [{
-    key: 'active',
-    get: function get() {
-      return this._active;
+    value: function attributeChangedCallback(attrName, oldValue, newValue) {
+      if (attrName === 'contents-class' && newValue !== 'ng-isolate-scope') {
+        var li = this.firstElementChild;
+        if (li) {
+          ul.className = newValue;
+        }
+      }
     }
 
     /**
-     * Set flag indicating tab is active
+     * Get tab row contents class
      *
-     * @param {boolean} value True to set tab active
+     * @returns {string} contents class
+     */
+
+  }, {
+    key: 'contentsClass',
+    get: function get() {
+      return this._contentsClass;
+    }
+
+    /**
+     * Set tab row contents class
+     *
+     * @param {string} value contents class
      */
     ,
     set: function set(value) {
-      if (this._active !== value) {
-        this._active = value;
-        this.setAttribute('active', value);
+      if (this._contentsClass !== value) {
+        this._contentsClass = value;
+        this.setAttribute('contents-class', value);
       }
+    }
+  }], [{
+    key: 'observedAttributes',
+    get: function get() {
+      return ['contents-class'];
     }
   }]);
 
-  return PfTab;
+  return PfTabRowContents;
 }(HTMLElement);
 
-window.customElements.define('pf-tab', PfTab);
+window.customElements.define('pf-tab-row-conents', PfTab);

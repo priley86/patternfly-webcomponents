@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 46);
+/******/ 	return __webpack_require__(__webpack_require__.s = 47);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -204,6 +204,13 @@ var PfUtil = function () {
       }
       return parentHeight;
     }
+  }, {
+    key: 'getAttributeOrProperty',
+    value: function getAttributeOrProperty(element, attribute) {
+      // checks element attributes and then properties
+      // React commonly gives us a node with attributes, when Angular adds it as a property
+      return element.attributes && element.attributes[attribute] ? element.attributes[attribute].value : element[attribute];
+    }
   }]);
 
   return PfUtil;
@@ -279,7 +286,7 @@ exports.PfAccordionTemplate = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfAccordionBody = __webpack_require__(28);
+var _pfAccordionBody = __webpack_require__(29);
 
 var _pfAccordionBody2 = _interopRequireDefault(_pfAccordionBody);
 
@@ -763,11 +770,17 @@ var _pfTabs = __webpack_require__(7);
 
 var _pfTabs2 = _interopRequireDefault(_pfTabs);
 
-var _pfTab3 = __webpack_require__(8);
+var _pfTabRowContents = __webpack_require__(8);
+
+var _pfTabRowContents2 = _interopRequireDefault(_pfTabRowContents);
+
+var _pfUtils = __webpack_require__(0);
+
+var _pfTab3 = __webpack_require__(9);
 
 var _pfTab4 = _interopRequireDefault(_pfTab3);
 
-__webpack_require__(9);
+__webpack_require__(10);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -781,13 +794,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * <b>&lt;pf-tabs&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
- * <pf-tabs class="nav nav-tabs">
- *  <pf-tab class="nav-item" content-id="content1" active="true">
+ * <pf-tabs tabs-class="nav nav-tabs">
+ *  <pf-tab tab-class="nav-item" content-id="content1" active="true">
  *    Tab One
  *  </pf-tab>
- *  <pf-tab class="nav-item" content-id="content2" active="true">
+ *  <pf-tab tab-class="nav-item" content-id="content2" active="true">
  *    Tab Two
  *  </pf-tab>
+ *  <pf-tab-row-contents contents-class="pf-tabrow-contents">
+ *    <button class="btn btn-default" type="button">Default</button>
+ *  </pf-tab-row-contents>
  * </pf-tabs>
  * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
  * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
@@ -808,10 +824,10 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
 
         this._makeTabsFromPfTab();
 
-        this.querySelector('ul').addEventListener('click', this);
+        this._makeTabRowContents();
 
         // Add the ul class if specified
-        this.querySelector('ul').className = this.attributes.class ? this.attributes.class.value : 'nav nav-tabs';
+        this.querySelector('ul').className = this.attributes['tabs-class'] ? this.attributes['tabs-class'].value : 'nav nav-tabs';
 
         if (!this.mutationObserver) {
           this.mutationObserver = new MutationObserver(this._handleMutations.bind(this));
@@ -839,7 +855,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
      * @param {string} newValue The new attribute value
      */
     value: function attributeChangedCallback(attrName, oldValue, newValue) {
-      if (attrName === 'class' && newValue !== 'ng-isolate-scope') {
+      if (attrName === 'tabs-class' && newValue !== 'ng-isolate-scope') {
         var ul = this.firstElementChild;
         if (ul) {
           ul.className = newValue;
@@ -854,7 +870,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
   }], [{
     key: 'observedAttributes',
     get: function get() {
-      return ['class'];
+      return ['tabs-class'];
     }
   }]);
 
@@ -868,28 +884,19 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
 
     _this.selectedIndex = null;
     _this.tabs = [];
+    _this.tabRowListItem = null;
     return _this;
   }
 
   /**
-   * Called when the element is removed from the DOM
+   * Handle mutations
+   *
+   * @param mutations
+   * @private
    */
 
 
   _createClass(PfTabs, [{
-    key: 'disconnectedCallback',
-    value: function disconnectedCallback() {
-      this.querySelector('ul').removeEventListener('click', this);
-    }
-
-    /**
-     * Handle mutations
-     *
-     * @param mutations
-     * @private
-     */
-
-  }, {
     key: '_handleMutations',
     value: function _handleMutations(mutations) {
       var _this2 = this;
@@ -918,7 +925,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
             var node = notes[1];
             var tab = void 0;
 
-            // a pf-tab node has been added or removed
+            // if a pf-tab node has been added or removed
             if (node.nodeName === 'PF-TAB') {
               if (action === 'add') {
                 //add tab
@@ -947,15 +954,22 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
                   _this2._makeActive(_this2.tabs[0]);
                 }
               }
+              return;
             }
 
-            //the pf-tab contents have changed, update the tab
-            if (action === 'add' && node.parentNode.nodeName === 'PF-TAB') {
-              var _tabIndex = node.parentNode.getAttribute('tab-index');
-              if (_tabIndex) {
-                var index = parseInt(_tabIndex);
-                var tabAnchor = _this2.tabs[index].tabElement.firstElementChild;
-                tabAnchor.innerHTML = node.parentNode.innerHTML;
+            //if the pf-tab-row-contents have changed, update the contents
+            if (action === 'add' && _this2.tabRowContents && _this2.tabRowContents.contains(node)) {
+              _this2.tabRowListItem.innerHTML = _this2.tabRowContents.innerHTML;
+              return;
+            }
+
+            //if the pf-tab contents have changed, update the tab
+            if (action === 'add') {
+              for (var i = 0; i < _this2.tabs.length; i++) {
+                if (_this2.tabs[i].pfTab.contains(node)) {
+                  var tabAnchor = _this2.tabs[i].tabElement.firstElementChild;
+                  tabAnchor.innerHTML = node.parentNode.innerHTML;
+                }
               }
             }
           });
@@ -1016,6 +1030,35 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
     }
 
     /**
+     * Helper function to create tab row contents
+     *
+     * @private
+     */
+
+  }, {
+    key: '_makeTabRowContents',
+    value: function _makeTabRowContents() {
+      this.tabRowContents = this.querySelector('pf-tab-row-contents');
+
+      if (this.tabRowContents) {
+        var frag = document.createElement('template');
+        frag.innerHTML = _pfTabRowContents2.default;
+
+        // move contents to the tab-row-contents template
+        var li = frag.content.firstElementChild;
+        li.innerHTML = this.tabRowContents.innerHTML;
+
+        // set the tab row class
+        var tabRowClass = _pfUtils.pfUtil.getAttributeOrProperty(this.tabRowContents, 'contents-class');
+        li.className = tabRowClass || 'pf-tabrow-contents';
+        var ul = this.querySelector('ul');
+        ul.appendChild(li);
+
+        this.tabRowListItem = li;
+      }
+    }
+
+    /**
      * Helper function to create a new tab element from given tab
      *
      * @param pfTab A PfTab element
@@ -1042,9 +1085,14 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
         _this5._tabClicked(tabElement);
       };
 
-      //React gives us a node with attributes, Angular adds it as a property
-      var tabContentId = pfTab.attributes && pfTab.attributes['content-id'] ? pfTab.attributes['content-id'].value : pfTab['content-id'];
+      var tabContentId = _pfUtils.pfUtil.getAttributeOrProperty(pfTab, 'content-id');
       tabAnchor.setAttribute('aria-controls', tabContentId);
+
+      var tabClass = _pfUtils.pfUtil.getAttributeOrProperty(pfTab, 'tab-class');
+      if (tabClass) {
+        tabElement.className = tabClass;
+      }
+
       var active = pfTab.attributes && pfTab.attributes.active || pfTab.active;
       var tab = {
         tabIndex: tabIndex,
@@ -1177,6 +1225,19 @@ exports.default = PfTabsTemplate;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+var PfTabRowContentsTemplate = "\n<li role=\"section\">\n</li>\n";
+exports.default = PfTabRowContentsTemplate;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1190,18 +1251,21 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  * <b>&lt;pf-tab&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
- * <pf-tabs>
- *  <pf-tab class="nav-item" content-id="content1" active="true">
+ * <pf-tabs tabs-class="nav nav-tabs">
+ *  <pf-tab tab-class="nav-item" content-id="content1" active="true">
  *    Tab One
  *  </pf-tab>
- *  <pf-tab class="nav-item" content-id="content2" active="true">
+ *  <pf-tab tab-class="nav-item" content-id="content2" active="true">
  *    Tab Two
  *  </pf-tab>
+ *  <pf-tab-row-contents contents-class="pf-tabrow-contents">
+ *    <button class="btn btn-default" type="button">Default</button>
+ *  </pf-tab-row-contents>
  * </pf-tabs>
  * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
  * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
  *
- * @prop {string} class the tab ul class
+ * @prop {string} tabClass the tab li class
  * @prop {string} contentId the content id which describes this tabs content
  * @prop {string} active whether this tab is currently active
  */
@@ -1215,7 +1279,7 @@ var PfTab = exports.PfTab = function (_HTMLElement) {
      * Called every time the element is inserted into the DOM
      */
     value: function connectedCallback() {
-      this._class = this.getAttribute('class');
+      this._tabClass = this.getAttribute('tab-class');
       this._contentId = this.getAttribute('content-id');
       this._active = this.getAttribute('active');
     }
@@ -1275,7 +1339,7 @@ var PfTab = exports.PfTab = function (_HTMLElement) {
 window.customElements.define('pf-tab', PfTab);
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1288,7 +1352,7 @@ exports.PfTabContent = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfTabContent = __webpack_require__(10);
+var _pfTabContent = __webpack_require__(11);
 
 var _pfTabContent2 = _interopRequireDefault(_pfTabContent);
 
@@ -1301,16 +1365,19 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
- * <b>&lt;pf-tab&gt;</b> element for Patternfly Web Components
+ * <b>&lt;pf-tab-content&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
- * <pf-tabs>
- *  <pf-tab class="nav-item" content-id="content1" active="true">
+ * <pf-tabs tabs-class="nav nav-tabs">
+ *  <pf-tab tab-class="nav-item" content-id="content1" active="true">
  *    Tab One
  *  </pf-tab>
- *  <pf-tab class="nav-item" content-id="content2" active="true">
+ *  <pf-tab tab-class="nav-item" content-id="content2" active="true">
  *    Tab Two
  *  </pf-tab>
+ *  <pf-tab-row-contents contents-class="pf-tabrow-contents">
+ *    <button class="btn btn-default" type="button">Default</button>
+ *  </pf-tab-row-contents>
  * </pf-tabs>
  * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
  * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
@@ -1353,7 +1420,7 @@ var PfTabContent = exports.PfTabContent = function (_HTMLElement) {
 window.customElements.define('pf-tab-content', PfTabContent);
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1366,7 +1433,7 @@ var PfTabContentTemplate = "\n<div role=\"tabpanel\"></div>\n";
 exports.default = PfTabContentTemplate;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1379,7 +1446,7 @@ exports.PfTooltip = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfTooltip = __webpack_require__(12);
+var _pfTooltip = __webpack_require__(13);
 
 var _pfTooltip2 = _interopRequireDefault(_pfTooltip);
 
@@ -1843,7 +1910,7 @@ var PfTooltip = exports.PfTooltip = function (_HTMLElement) {
 window.customElements.define('pf-tooltip', PfTooltip);
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1857,7 +1924,7 @@ var PfTooltipTemplate = "\n<div role=\"tooltip\" class=\"tooltip\">\n    <div cl
 exports.default = PfTooltipTemplate;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1870,11 +1937,11 @@ exports.PfUtilizationBarChart = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfUtilizationBarChartDefault = __webpack_require__(14);
+var _pfUtilizationBarChartDefault = __webpack_require__(15);
 
 var _pfUtilizationBarChartDefault2 = _interopRequireDefault(_pfUtilizationBarChartDefault);
 
-var _pfUtilizationBarChartInline = __webpack_require__(15);
+var _pfUtilizationBarChartInline = __webpack_require__(16);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2037,7 +2104,7 @@ var PfUtilizationBarChart = exports.PfUtilizationBarChart = function (_HTMLEleme
 window.customElements.define('pf-utilization-bar-chart', PfUtilizationBarChart);
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2050,7 +2117,7 @@ var pfUtilzBarChartDefault = "\n  <div class=\"utilization-bar-chart-pf\">\n    
 exports.default = pfUtilzBarChartDefault;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2063,7 +2130,7 @@ var pfUtilzBarChartInline = "\n  <div class=\"progress-container progress-descri
 exports.inline = pfUtilzBarChartInline;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2078,23 +2145,23 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _pfUtils = __webpack_require__(0);
 
-var _pfModalDialog = __webpack_require__(17);
+var _pfModalDialog = __webpack_require__(18);
 
 var _pfModalDialog2 = _interopRequireDefault(_pfModalDialog);
 
-var _pfModalContent = __webpack_require__(18);
+var _pfModalContent = __webpack_require__(19);
 
 var _pfModalContent2 = _interopRequireDefault(_pfModalContent);
 
-var _pfModalHeader = __webpack_require__(19);
+var _pfModalHeader = __webpack_require__(20);
 
 var _pfModalHeader2 = _interopRequireDefault(_pfModalHeader);
 
-var _pfModalBody = __webpack_require__(21);
+var _pfModalBody = __webpack_require__(22);
 
 var _pfModalBody2 = _interopRequireDefault(_pfModalBody);
 
-var _pfModalFooter = __webpack_require__(22);
+var _pfModalFooter = __webpack_require__(23);
 
 var _pfModalFooter2 = _interopRequireDefault(_pfModalFooter);
 
@@ -2450,7 +2517,7 @@ var PfModal = exports.PfModal = function (_HTMLElement) {
 window.customElements.define('pf-modal', PfModal);
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2512,7 +2579,7 @@ var PfModalDialog = exports.PfModalDialog = function (_HTMLElement) {
 window.customElements.define('pf-modal-dialog', PfModalDialog);
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2574,7 +2641,7 @@ var PfModalContent = exports.PfModalContent = function (_HTMLElement) {
 window.customElements.define('pf-modal-content', PfModalContent);
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2589,7 +2656,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _pfUtils = __webpack_require__(0);
 
-var _pfModalHeader = __webpack_require__(20);
+var _pfModalHeader = __webpack_require__(21);
 
 var _pfModalHeader2 = _interopRequireDefault(_pfModalHeader);
 
@@ -2722,7 +2789,7 @@ var PfModalHeader = exports.PfModalHeader = function (_HTMLElement) {
 window.customElements.define('pf-modal-header', PfModalHeader);
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2735,7 +2802,7 @@ var PfModalHeaderTemplate = "\n<button type=\"button\" class=\"close pf-hide-mod
 exports.default = PfModalHeaderTemplate;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2793,7 +2860,7 @@ var PfModalBody = exports.PfModalBody = function (_HTMLElement) {
 window.customElements.define('pf-modal-body', PfModalBody);
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2985,7 +3052,7 @@ var PfModalFooter = exports.PfModalFooter = function (_HTMLElement) {
 window.customElements.define('pf-modal-footer', PfModalFooter);
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3241,7 +3308,7 @@ var PfDropdown = exports.PfDropdown = function (_HTMLElement) {
 window.customElements.define('pf-dropdown', PfDropdown);
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3706,7 +3773,7 @@ var PfTouchspin = exports.PfTouchspin = function (_HTMLElement) {
 window.customElements.define('pf-touchspin', PfTouchspin);
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3719,7 +3786,7 @@ exports.PfAccordion = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfAccordionPanel = __webpack_require__(26);
+var _pfAccordionPanel = __webpack_require__(27);
 
 var _pfAccordionPanel2 = _interopRequireDefault(_pfAccordionPanel);
 
@@ -4048,7 +4115,7 @@ var PfAccordion = exports.PfAccordion = function (_HTMLElement) {
 })();
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4061,7 +4128,7 @@ exports.PfAccordionPanel = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfAccordionHeading = __webpack_require__(27);
+var _pfAccordionHeading = __webpack_require__(28);
 
 var _pfAccordionHeading2 = _interopRequireDefault(_pfAccordionHeading);
 
@@ -4184,7 +4251,7 @@ var PfAccordionPanel = exports.PfAccordionPanel = function (_HTMLElement) {
 })();
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4377,7 +4444,7 @@ var PfAccordionHeading = exports.PfAccordionHeading = function (_HTMLElement) {
 })();
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4427,7 +4494,7 @@ var PfAccordionBody = exports.PfAccordionBody = function (_HTMLElement) {
 })();
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4440,7 +4507,7 @@ exports.PfListView = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfListViewTemplate = __webpack_require__(30);
+var _pfListViewTemplate = __webpack_require__(31);
 
 var _pfListViewTemplate2 = _interopRequireDefault(_pfListViewTemplate);
 
@@ -4702,7 +4769,7 @@ var PfListView = exports.PfListView = function (_HTMLElement) {
 window.customElements.define('pf-list-view', PfListView);
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4719,7 +4786,7 @@ exports.default = pfListViewDefault;
 exports.itemRow = pfListItem;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4850,7 +4917,7 @@ var PFTemplateRepeater = function (_HTMLElement) {
 window.customElements.define("pf-template-repeater", PFTemplateRepeater);
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4877,7 +4944,7 @@ var PFTemplate = function (_HTMLElement) {
 window.customElements.define("pf-template", PFTemplate);
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5033,7 +5100,7 @@ var PfI18n = exports.PfI18n = function (_HTMLElement) {
 window.customElements.define('pf-i18n', PfI18n);
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5046,7 +5113,7 @@ exports.PfHello = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfHello = __webpack_require__(35);
+var _pfHello = __webpack_require__(36);
 
 var _pfHello2 = _interopRequireDefault(_pfHello);
 
@@ -5159,7 +5226,7 @@ var PfHello = exports.PfHello = function (_HTMLElement) {
 window.customElements.define('pf-hello', PfHello);
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5172,7 +5239,7 @@ var PfHelloTemplate = "\n<span></span>\n";
 exports.default = PfHelloTemplate;
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5185,7 +5252,7 @@ exports.PfPopover = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pfPopover = __webpack_require__(37);
+var _pfPopover = __webpack_require__(38);
 
 var _pfPopover2 = _interopRequireDefault(_pfPopover);
 
@@ -5719,7 +5786,7 @@ var PfPopover = exports.PfPopover = function (_HTMLElement) {
 window.customElements.define('pf-popover', PfPopover);
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5733,7 +5800,6 @@ var PfPopoverTemplate = "\n<div class=\"popover\" role=\"popover\">\n  <div clas
 exports.default = PfPopoverTemplate;
 
 /***/ }),
-/* 38 */,
 /* 39 */,
 /* 40 */,
 /* 41 */,
@@ -5741,62 +5807,63 @@ exports.default = PfPopoverTemplate;
 /* 43 */,
 /* 44 */,
 /* 45 */,
-/* 46 */
+/* 46 */,
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 /* Require the HTML Element Shim */
-__webpack_require__(47);
+__webpack_require__(48);
 
 /** PF Alert Component **/
 __webpack_require__(3);
 
 /** PfListView Component **/
-__webpack_require__(29);
+__webpack_require__(30);
 
 /** PfTemplateRepeaterComponent **/
-__webpack_require__(31);
+__webpack_require__(32);
 
 /** PfTemplateComponent **/
-__webpack_require__(32);
+__webpack_require__(33);
 
 /** PF Tabs Component **/
 __webpack_require__(5);
 
 /** PF Tooltip Component **/
-__webpack_require__(11);
+__webpack_require__(12);
 
 /** PF Utilization Bar Chart **/
-__webpack_require__(13);
+__webpack_require__(14);
 
 /** PF Modal Component **/
-__webpack_require__(16);
+__webpack_require__(17);
 
 /** PF Utils **/
 __webpack_require__(0);
 
 /** PF I18N **/
-__webpack_require__(33);
-
-/** PF Hello **/
 __webpack_require__(34);
 
-/** PF Dropdown **/
-__webpack_require__(23);
+/** PF Hello **/
+__webpack_require__(35);
 
-/** PF Touchspin **/
+/** PF Dropdown **/
 __webpack_require__(24);
 
-/** PF Popover **/
-__webpack_require__(36);
-
-/** PF Accordion Component **/
+/** PF Touchspin **/
 __webpack_require__(25);
 
+/** PF Popover **/
+__webpack_require__(37);
+
+/** PF Accordion Component **/
+__webpack_require__(26);
+
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

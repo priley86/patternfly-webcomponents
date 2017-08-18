@@ -1,5 +1,7 @@
 import { default as tabTemplate } from 'pf-tab.template';
 import { default as tabsTemplate } from 'pf-tabs.template';
+import { default as tabRowTemplate } from 'pf-tab-row-contents.template';
+import { pfUtil } from 'pf-utils.js';
 import PfTab from 'pf-tab.component';
 import 'pf-tab-content.component';
 
@@ -7,13 +9,16 @@ import 'pf-tab-content.component';
  * <b>&lt;pf-tabs&gt;</b> element for Patternfly Web Components
  *
  * @example {@lang xml}
- * <pf-tabs class="nav nav-tabs">
- *  <pf-tab class="nav-item" content-id="content1" active="true">
+ * <pf-tabs tabs-class="nav nav-tabs">
+ *  <pf-tab tab-class="nav-item" content-id="content1" active="true">
  *    Tab One
  *  </pf-tab>
- *  <pf-tab class="nav-item" content-id="content2" active="true">
+ *  <pf-tab tab-class="nav-item" content-id="content2" active="true">
  *    Tab Two
  *  </pf-tab>
+ *  <pf-tab-row-contents contents-class="pf-tabrow-contents">
+ *    <button class="btn btn-default" type="button">Default</button>
+ *  </pf-tab-row-contents>
  * </pf-tabs>
  * <pf-tab-content content-id="content1"> <p> my content 1 </p></pf-tab-content>
  * <pf-tab-content content-id="content2"> <p> my content 2 </p></pf-tab-content>
@@ -29,11 +34,11 @@ export class PfTabs extends HTMLElement {
 
       this._makeTabsFromPfTab();
 
-      this.querySelector('ul').addEventListener('click', this);
+      this._makeTabRowContents();
 
       // Add the ul class if specified
-      this.querySelector('ul').className = this.attributes.class
-          ? this.attributes.class.value
+      this.querySelector('ul').className = this.attributes['tabs-class']
+          ? this.attributes['tabs-class'].value
           : 'nav nav-tabs';
 
       if (!this.mutationObserver) {
@@ -50,7 +55,7 @@ export class PfTabs extends HTMLElement {
     * Only attributes listed in the observedAttributes property will receive this callback
     */
   static get observedAttributes() {
-    return ['class'];
+    return ['tabs-class'];
   }
 
   /**
@@ -61,7 +66,7 @@ export class PfTabs extends HTMLElement {
    * @param {string} newValue The new attribute value
    */
   attributeChangedCallback(attrName, oldValue, newValue) {
-    if (attrName === 'class' && newValue !== 'ng-isolate-scope') {
+    if (attrName === 'tabs-class' && newValue !== 'ng-isolate-scope') {
       let ul = this.firstElementChild;
       if (ul) {
         ul.className = newValue;
@@ -79,13 +84,7 @@ export class PfTabs extends HTMLElement {
 
     this.selectedIndex = null;
     this.tabs = [];
-  }
-
-  /**
-   * Called when the element is removed from the DOM
-   */
-  disconnectedCallback() {
-    this.querySelector('ul').removeEventListener('click', this);
+    this.tabRowListItem = null;
   }
 
   /**
@@ -119,7 +118,7 @@ export class PfTabs extends HTMLElement {
           let node = notes[1];
           let tab;
 
-          // a pf-tab node has been added or removed
+          // if a pf-tab node has been added or removed
           if (node.nodeName === 'PF-TAB') {
             if (action === 'add') {
               //add tab
@@ -148,15 +147,24 @@ export class PfTabs extends HTMLElement {
                 this._makeActive(this.tabs[0]);
               }
             }
+            return;
           }
 
-          //the pf-tab contents have changed, update the tab
-          if (action === 'add' && node.parentNode.nodeName === 'PF-TAB') {
-            let tabIndex = node.parentNode.getAttribute('tab-index');
-            if (tabIndex) {
-              let index = parseInt(tabIndex);
-              let tabAnchor = this.tabs[index].tabElement.firstElementChild;
-              tabAnchor.innerHTML = node.parentNode.innerHTML;
+          //if the pf-tab-row-contents have changed, update the contents
+          if (action === 'add'
+            && this.tabRowContents
+            && this.tabRowContents.contains(node)) {
+            this.tabRowListItem.innerHTML = this.tabRowContents.innerHTML;
+            return;
+          }
+
+          //if the pf-tab contents have changed, update the tab
+          if (action === 'add') {
+            for (let i = 0; i < this.tabs.length; i++) {
+              if (this.tabs[i].pfTab.contains(node)) {
+                let tabAnchor = this.tabs[i].tabElement.firstElementChild;
+                tabAnchor.innerHTML = node.parentNode.innerHTML;
+              }
             }
           }
         });
@@ -210,6 +218,32 @@ export class PfTabs extends HTMLElement {
   }
 
   /**
+   * Helper function to create tab row contents
+   *
+   * @private
+   */
+  _makeTabRowContents() {
+    this.tabRowContents = this.querySelector('pf-tab-row-contents');
+
+    if (this.tabRowContents) {
+      let frag = document.createElement('template');
+      frag.innerHTML = tabRowTemplate;
+
+      // move contents to the tab-row-contents template
+      let li = frag.content.firstElementChild;
+      li.innerHTML = this.tabRowContents.innerHTML;
+
+      // set the tab row class
+      let tabRowClass = pfUtil.getAttributeOrProperty(this.tabRowContents, 'contents-class');
+      li.className = tabRowClass || 'pf-tabrow-contents';
+      let ul = this.querySelector('ul');
+      ul.appendChild(li);
+
+      this.tabRowListItem = li;
+    }
+  }
+
+  /**
    * Helper function to create a new tab element from given tab
    *
    * @param pfTab A PfTab element
@@ -231,10 +265,14 @@ export class PfTabs extends HTMLElement {
       this._tabClicked(tabElement);
     };
 
-    //React gives us a node with attributes, Angular adds it as a property
-    let tabContentId = pfTab.attributes && pfTab.attributes['content-id'] ?
-      pfTab.attributes['content-id'].value : pfTab['content-id'];
+    let tabContentId = pfUtil.getAttributeOrProperty(pfTab, 'content-id');
     tabAnchor.setAttribute('aria-controls', tabContentId);
+
+    let tabClass = pfUtil.getAttributeOrProperty(pfTab, 'tab-class');
+    if (tabClass) {
+      tabElement.className = tabClass;
+    }
+
     let active = (pfTab.attributes && pfTab.attributes.active) || pfTab.active;
     let tab = {
       tabIndex: tabIndex,
