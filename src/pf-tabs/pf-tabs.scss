@@ -1,19 +1,5 @@
-pf-tabs.nav.nav-tabs .nav.nav-tabs-pf {
-  & > li {
-    font-size: 12px;
-
-    &:first-child > a {
-      padding-left: 15px;
-
-      &:before {
-        left: 15px!important;
-      }
-    }
-  }
-}
-
-pf-tabs.nav.nav-tabs li,
-pf-tabs.nav.nav-tabs li a {
+pf-tabs ul.nav.nav-tabs li,
+pf-tabs ul.nav.nav-tabs li a {
   cursor: pointer;
 }
 
@@ -37,3 +23,36 @@ pf-tabs pf-dropdown > a {
 pf-tabs li.active pf-dropdown > a {
   color: #0088ce;
 }
+
+// secondary tabs
+pf-tab-content > pf-tabs ul.nav.nav-tabs-pf {
+  & > li {
+    font-size: 12px;
+
+    &:first-child > a {
+      padding-left: 15px;
+
+      &:before {
+        left: 15px!important;
+      }
+    }
+  }
+}
+
+// tab row
+pf-tab-row-contents {
+  display: none;
+}
+
+pf-tabs ul.pf-tabrow {
+  display: flex;
+  flex-wrap: wrap-reverse;
+
+  & > li {
+    float: none;
+  }
+  & > .pf-tabrow-contents {
+    margin-left: auto;
+  }
+}
+
