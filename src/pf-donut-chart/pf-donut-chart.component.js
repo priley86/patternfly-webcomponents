@@ -10,7 +10,7 @@ export class PfDonutChart extends HTMLElement {
    *
    */
   connectedCallback() {
-    this._additionalData = this.getAttribute('data') ? JSON.parse(this.getAttribute('data').replace(/'/g, '"')): {};
+    this._additionalData = this.getAttribute('data') ? JSON.parse(this.getAttribute('data').replace(/'/g, '"')) : {};
     this._width = parseInt(this.getAttribute('width')) ? this.getAttribute('width') : null;
     this._height = parseInt(this.getAttribute('height')) ? this.getAttribute('height') : 171;
     this._legend = this.getAttribute('legend') ? JSON.parse(this.getAttribute('legend').replace(/'/g, '"')) : { show: false };
@@ -187,17 +187,17 @@ export class PfDonutChart extends HTMLElement {
     console.log(this.onmouseover());
   }
 
-  _getData(){
-    if(this.getAttribute('columns')){
+  _getData () {
+    if (this.getAttribute('columns')) {
       this._inputData = JSON.parse(this.getAttribute('columns').replace(/'/g, '"'));
       this._dataFormat = 'columns';
-    } else if(this.getAttribute('rows')) {
+    } else if (this.getAttribute('rows')) {
       this._inputData = JSON.parse(this.getAttribute('rows').replace(/'/g, '"'));
       this._dataFormat = 'rows';
-    } else if(this.getAttribute('json')) {
-     this._inputData = JSON.parse(this.getAttribute('json').replace(/'/g, '"'));
-      this._dataFormat = 'json'; 
-    } else if(this.getAttribute('url')) {
+    } else if (this.getAttribute('json')) {
+      this._inputData = JSON.parse(this.getAttribute('json').replace(/'/g, '"'));
+      this._dataFormat = 'json';
+    } else if (this.getAttribute('url')) {
       this._inputData = this.getAttribute('url');
       this._dataFormat = 'url';
     }
@@ -209,11 +209,12 @@ export class PfDonutChart extends HTMLElement {
   prepareData() {
     switch (this._dataFormat) {
       case 'column':
+        var a = { b: 1};
+        var c = { ...a };
         this._data = {
           columns: this._inputData,
           type: 'donut',
-          colors: this._colors,
-          ...this._additionalData
+          colors: this._colors
         };
         break;
 
