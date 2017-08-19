@@ -163,15 +163,11 @@ export class PfTabs extends HTMLElement {
             this.tabRowListItem.removeChild(node);
             return;
           }
-          if (this.tabRowContents && this.tabRowContents.contains(node)) {
-            if (action === 'add' && type === 'childList'
+          if (this.tabRowContents && this.tabRowContents.contains(node)
+              && action === 'add' && type === 'childList'
               && target && target.nodeName === 'PF-TAB-ROW-CONTENTS') {
-              //if this is an add, we need to transclude the inner dom
-              pfUtil.transcludeChildren(this.tabRowContents, this.tabRowListItem);
-            } else {
-              //else just update the inner html (and thus attributes and data)
-              this.tabRowListItem.innerHTML = this.tabRowContents.innerHTML;
-            }
+            //if this is an add, we need to transclude the inner dom
+            pfUtil.transcludeChildren(this.tabRowContents, this.tabRowListItem);
             return;
           }
         });

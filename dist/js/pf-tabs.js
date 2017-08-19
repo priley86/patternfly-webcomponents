@@ -558,14 +558,9 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
               _this2.tabRowListItem.removeChild(node);
               return;
             }
-            if (_this2.tabRowContents && _this2.tabRowContents.contains(node)) {
-              if (action === 'add' && type === 'childList' && target && target.nodeName === 'PF-TAB-ROW-CONTENTS') {
-                //if this is an add, we need to transclude the inner dom
-                _pfUtils.pfUtil.transcludeChildren(_this2.tabRowContents, _this2.tabRowListItem);
-              } else {
-                //else just update the inner html (and thus attributes and data)
-                _this2.tabRowListItem.innerHTML = _this2.tabRowContents.innerHTML;
-              }
+            if (_this2.tabRowContents && _this2.tabRowContents.contains(node) && action === 'add' && type === 'childList' && target && target.nodeName === 'PF-TAB-ROW-CONTENTS') {
+              //if this is an add, we need to transclude the inner dom
+              _pfUtils.pfUtil.transcludeChildren(_this2.tabRowContents, _this2.tabRowListItem);
               return;
             }
           });
