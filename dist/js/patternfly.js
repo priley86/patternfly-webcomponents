@@ -903,18 +903,11 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
 
       var handlers = [];
       mutations.forEach(function (mutationRecord) {
-        //child dom nodes have been added
-        if (mutationRecord.type === 'childList') {
-          for (var i = 0; i < mutationRecord.addedNodes.length; i++) {
-            handlers.push(['add', mutationRecord.addedNodes[i]]);
-          }
-          for (var _i = 0; _i < mutationRecord.removedNodes.length; _i++) {
-            handlers.push(['remove', mutationRecord.removedNodes[_i]]);
-          }
-        } else if (mutationRecord.type === 'attributes') {
-          //mutationRecord.attributeName contains changed attributes
-          //note: we can ignore this for attributes as the v1 spec of custom
-          //elements already provides attributeChangedCallback
+        for (var i = 0; i < mutationRecord.addedNodes.length; i++) {
+          handlers.push(['add', mutationRecord.addedNodes[i], mutationRecord.type]);
+        }
+        for (var _i = 0; _i < mutationRecord.removedNodes.length; _i++) {
+          handlers.push(['remove', mutationRecord.removedNodes[_i], mutationRecord.type]);
         }
       });
       if (handlers.length) {
@@ -923,53 +916,53 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
           handlers.forEach(function (notes) {
             var action = notes[0];
             var node = notes[1];
+            var type = notes[2];
             var tab = void 0;
 
-            // if a pf-tab node has been added or removed
-            if (node.nodeName === 'PF-TAB') {
-              if (action === 'add') {
-                //add tab
-                tab = _this2._makeTab(node);
+            // if a pf-tab node has been added
+            if (node.nodeName === 'PF-TAB' && type === 'childList' && action === 'add') {
+              //add tab
+              tab = _this2._makeTab(node);
 
-                //if active, deactivate others
-                if (tab.active) {
-                  [].forEach.call(_this2.tabs, function (t) {
-                    if (t.tabIndex !== tab.tabIndex) {
-                      _this2._makeInactive(t);
-                    }
-                  });
-                } else {
-                  _this2._makeInactive(tab);
-                }
-                ul.appendChild(tab.tabElement);
+              //if active, deactivate others
+              if (tab.active) {
+                [].forEach.call(_this2.tabs, function (t) {
+                  if (t.tabIndex !== tab.tabIndex) {
+                    _this2._makeInactive(t);
+                  }
+                });
               } else {
-                //remove tab
-                var tabIndex = parseInt(node.attributes['tab-index'], 10);
-                tab = _this2.tabs[tabIndex];
-                tab.tabElement.parentNode.removeChild(tab.tabElement);
-                _this2.tabs.splice(tabIndex, 1);
+                _this2._makeInactive(tab);
+              }
+              ul.appendChild(tab.tabElement);
+              return;
+            }
+            // if a pf-tab node has been removed
+            if (node.nodeName === 'PF-TAB' && type === 'childList' && action === 'remove') {
+              //remove tab
+              var tabIndex = parseInt(node.attributes['tab-index'], 10);
+              tab = _this2.tabs[tabIndex];
+              tab.tabElement.parentNode.removeChild(tab.tabElement);
+              _this2.tabs.splice(tabIndex, 1);
 
-                //we removed the active tab, make the first tab active now instead
-                if (tab.active) {
-                  _this2._makeActive(_this2.tabs[0]);
-                }
+              //we removed the active tab, make the first tab active now instead
+              if (tab.active) {
+                _this2._makeActive(_this2.tabs[0]);
               }
               return;
             }
 
             //if the pf-tab-row-contents have changed, update the contents
-            if (action === 'add' && _this2.tabRowContents && _this2.tabRowContents.contains(node)) {
+            if (_this2.tabRowContents && _this2.tabRowContents.contains(node)) {
               _this2.tabRowListItem.innerHTML = _this2.tabRowContents.innerHTML;
               return;
             }
 
             //if the pf-tab contents have changed, update the tab
-            if (action === 'add') {
-              for (var i = 0; i < _this2.tabs.length; i++) {
-                if (_this2.tabs[i].pfTab.contains(node)) {
-                  var tabAnchor = _this2.tabs[i].tabElement.firstElementChild;
-                  tabAnchor.innerHTML = node.parentNode.innerHTML;
-                }
+            for (var i = 0; i < _this2.tabs.length; i++) {
+              if (_this2.tabs[i].pfTab.contains(node)) {
+                var tabAnchor = _this2.tabs[i].tabElement.firstElementChild;
+                tabAnchor.innerHTML = node.parentNode.innerHTML;
               }
             }
           });
