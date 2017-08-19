@@ -43,7 +43,7 @@ export class PfTabs extends HTMLElement {
 
       if (!this.mutationObserver) {
         this.mutationObserver = new MutationObserver(this._handleMutations.bind(this));
-        this.mutationObserver.observe(this, { childList: true, attributes: true, subtree: true});
+        this.mutationObserver.observe(this, { characterData: true, childList: true, attributes: true, subtree: true});
       }
 
       this.initialized = true;
