@@ -72,9 +72,10 @@ var PfTabRowContents = exports.PfTabRowContents = function (_HTMLElement) {
      */
     value: function attributeChangedCallback(attrName, oldValue, newValue) {
       if (attrName === 'contents-class' && newValue !== 'ng-isolate-scope') {
-        var li = this.firstElementChild;
+        //the last li within the tabs ul
+        var li = this.parentNode.firstElementChild.lastElementChild;
         if (li) {
-          ul.className = newValue;
+          li.className = newValue;
         }
       }
     }

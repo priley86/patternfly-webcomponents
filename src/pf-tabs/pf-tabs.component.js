@@ -96,11 +96,19 @@ export class PfTabs extends HTMLElement {
   _handleMutations(mutations) {
     let handlers = [];
     mutations.forEach(function(mutationRecord) {
-      for (let i = 0; i < mutationRecord.addedNodes.length; i++) {
-        handlers.push(['add', mutationRecord.addedNodes[i], mutationRecord.type]);
+      if (mutationRecord.type === 'childList') {
+        for (let i = 0; i < mutationRecord.addedNodes.length; i++) {
+          handlers.push(['add', mutationRecord.target, 'childList', mutationRecord.addedNodes[i]]);
+        }
+        for (let i = 0; i < mutationRecord.removedNodes.length; i++) {
+          handlers.push(['remove', mutationRecord.target, 'childList', mutationRecord.removedNodes[i]]);
+        }
       }
-      for (let i = 0; i < mutationRecord.removedNodes.length; i++) {
-        handlers.push(['remove', mutationRecord.removedNodes[i], mutationRecord.type]);
+      if (mutationRecord.type === 'attributes') {
+        handlers.push([mutationRecord.attributeName, mutationRecord.target, 'attributes']);
+      }
+      if (mutationRecord.type === 'characterData') {
+        handlers.push([mutationRecord.oldValue, mutationRecord.target, 'characterData']);
       }
     });
     if (handlers.length) {
@@ -108,14 +116,15 @@ export class PfTabs extends HTMLElement {
         let ul = this.querySelector('ul');
         handlers.forEach((notes) => {
           let action = notes[0];
-          let node = notes[1];
+          let target = notes[1];
           let type = notes[2];
-          let tab;
+          let node = notes[3];
 
           // if a pf-tab node has been added
-          if (node.nodeName === 'PF-TAB' && type === 'childList' && action === 'add') {
+          if (node && node.nodeName === 'PF-TAB' && type === 'childList' && action === 'add'
+            && target.nodeName === 'PF-TABS') {
             //add tab
-            tab = this._makeTab(node);
+            let tab = this._makeTab(node);
 
             //if active, deactivate others
             if (tab.active) {
@@ -127,14 +136,16 @@ export class PfTabs extends HTMLElement {
             } else {
               this._makeInactive(tab);
             }
-            ul.appendChild(tab.tabElement);
+            ul.insertBefore(tab.tabElement, ul.children[this.tabs.length - 1]);
             return;
           }
+
           // if a pf-tab node has been removed
-          if (node.nodeName === 'PF-TAB' && type === 'childList' && action === 'remove') {
+          if (node && node.nodeName === 'PF-TAB' && type === 'childList' && action === 'remove'
+            && target.nodeName === 'PF-TABS') {
             //remove tab
             let tabIndex = parseInt(node.attributes['tab-index'], 10);
-            tab = this.tabs[tabIndex];
+            let tab = this.tabs[tabIndex];
             tab.tabElement.parentNode.removeChild(tab.tabElement);
             this.tabs.splice(tabIndex, 1);
 
@@ -146,18 +157,20 @@ export class PfTabs extends HTMLElement {
           }
 
           //if the pf-tab-row-contents have changed, update the contents
-          if (this.tabRowContents
-            && this.tabRowContents.contains(node)) {
-            this.tabRowListItem.innerHTML = this.tabRowContents.innerHTML;
+          if (this.tabRowContents && action === 'remove' && type === 'childList'
+            && this.tabRowListItem.contains(node)) {
+            this.tabRowListItem.removeChild(node);
             return;
           }
-
-          //if the pf-tab contents have changed, update the tab
-          for (let i = 0; i < this.tabs.length; i++) {
-            if (this.tabs[i].pfTab.contains(node)) {
-              let tabAnchor = this.tabs[i].tabElement.firstElementChild;
-              tabAnchor.innerHTML = node.parentNode.innerHTML;
+          if (this.tabRowContents && this.tabRowContents.contains(node)) {
+            if (action === 'add' && type === 'childList') {
+              //if this is an add, we need to transclude the inner dom
+              pfUtil.transcludeChildren(this.tabRowContents, this.tabRowListItem);
+            } else {
+              //else just update the inner html (and thus attributes and data)
+              this.tabRowListItem.innerHTML = this.tabRowContents.innerHTML;
             }
+            return;
           }
         });
       });
@@ -171,12 +184,14 @@ export class PfTabs extends HTMLElement {
    */
   setActiveTab(tabIndex) {
     let tab = this.tabs[tabIndex];
-    this._makeActive(tab);
-    [].forEach.call(this.tabs, (t) => {
-      if (t.tabIndex !== tab.tabIndex) {
-        this._makeInactive(t);
-      }
-    });
+    if (!tab.active) {
+      this._makeActive(tab);
+      [].forEach.call(this.tabs, (t) => {
+        if (t.tabIndex !== tab.tabIndex) {
+          this._makeInactive(t);
+        }
+      });
+    }
   }
 
   /**
@@ -223,11 +238,12 @@ export class PfTabs extends HTMLElement {
 
       // move contents to the tab-row-contents template
       let li = frag.content.firstElementChild;
-      li.innerHTML = this.tabRowContents.innerHTML;
+      pfUtil.transcludeChildren(this.tabRowContents, li);
 
       // set the tab row class
       let tabRowClass = pfUtil.getAttributeOrProperty(this.tabRowContents, 'contents-class');
       li.className = tabRowClass || 'pf-tabrow-contents';
+
       let ul = this.querySelector('ul');
       ul.appendChild(li);
 
@@ -250,7 +266,8 @@ export class PfTabs extends HTMLElement {
     frag.innerHTML = tabTemplate;
     let tabElement = frag.content.firstElementChild;
     let tabAnchor = tabElement.firstElementChild;
-    tabAnchor.innerHTML = pfTab.innerHTML;
+
+    pfUtil.transcludeChildren(pfTab, tabAnchor);
 
     tabAnchor.onclick = (e) => {
       e.preventDefault();

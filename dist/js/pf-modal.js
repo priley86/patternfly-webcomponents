@@ -77,6 +77,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
@@ -211,6 +213,16 @@ var PfUtil = function () {
       // checks element attributes and then properties
       // React commonly gives us a node with attributes, when Angular adds it as a property
       return element.attributes && element.attributes[attribute] ? element.attributes[attribute].value : element[attribute];
+    }
+  }, {
+    key: 'transcludeChildren',
+    value: function transcludeChildren(fromElement, toElement) {
+      // transcludes all child elements from the fromElement to the toElement,
+      // retaining all event handlers and attributes/props.
+      // cloneNode and innerHTML will not do this like appendChild (which moves the child element)
+      [].concat(_toConsumableArray(fromElement.childNodes)).forEach(function (child) {
+        toElement.appendChild(child);
+      });
     }
   }]);
 
