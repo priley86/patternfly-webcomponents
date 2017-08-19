@@ -909,7 +909,7 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
             // if a pf-tab node has been removed
             if (node && node.nodeName === 'PF-TAB' && type === 'childList' && action === 'remove' && target.nodeName === 'PF-TABS') {
               //remove tab
-              var tabIndex = parseInt(node.attributes['tab-index'], 10);
+              var tabIndex = parseInt(node.getAttribute('tab-index'), 10);
               var _tab = _this2.tabs[tabIndex];
               _tab.tabElement.parentNode.removeChild(_tab.tabElement);
               _this2.tabs.splice(tabIndex, 1);
@@ -922,12 +922,12 @@ var PfTabs = exports.PfTabs = function (_HTMLElement) {
             }
 
             //if the pf-tab-row-contents have changed, update the contents
-            if (_this2.tabRowContents && action === 'remove' && type === 'childList' && _this2.tabRowListItem.contains(node)) {
+            if (_this2.tabRowContents && action === 'remove' && type === 'childList' && target && target.nodeName === 'LI' && _this2.tabRowListItem.contains(node)) {
               _this2.tabRowListItem.removeChild(node);
               return;
             }
             if (_this2.tabRowContents && _this2.tabRowContents.contains(node)) {
-              if (action === 'add' && type === 'childList') {
+              if (action === 'add' && type === 'childList' && target && target.nodeName === 'PF-TAB-ROW-CONTENTS') {
                 //if this is an add, we need to transclude the inner dom
                 _pfUtils.pfUtil.transcludeChildren(_this2.tabRowContents, _this2.tabRowListItem);
               } else {

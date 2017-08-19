@@ -144,7 +144,7 @@ export class PfTabs extends HTMLElement {
           if (node && node.nodeName === 'PF-TAB' && type === 'childList' && action === 'remove'
             && target.nodeName === 'PF-TABS') {
             //remove tab
-            let tabIndex = parseInt(node.attributes['tab-index'], 10);
+            let tabIndex = parseInt(node.getAttribute('tab-index'), 10);
             let tab = this.tabs[tabIndex];
             tab.tabElement.parentNode.removeChild(tab.tabElement);
             this.tabs.splice(tabIndex, 1);
@@ -158,12 +158,14 @@ export class PfTabs extends HTMLElement {
 
           //if the pf-tab-row-contents have changed, update the contents
           if (this.tabRowContents && action === 'remove' && type === 'childList'
+            && target && target.nodeName === 'LI'
             && this.tabRowListItem.contains(node)) {
             this.tabRowListItem.removeChild(node);
             return;
           }
           if (this.tabRowContents && this.tabRowContents.contains(node)) {
-            if (action === 'add' && type === 'childList') {
+            if (action === 'add' && type === 'childList'
+              && target && target.nodeName === 'PF-TAB-ROW-CONTENTS') {
               //if this is an add, we need to transclude the inner dom
               pfUtil.transcludeChildren(this.tabRowContents, this.tabRowListItem);
             } else {
